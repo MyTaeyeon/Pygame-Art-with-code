@@ -5,10 +5,10 @@ pygame.init()
 sysf = pygame.font.SysFont(pygame.font.get_default_font(),16)
 
 def line(surface,color,start_pos,end_pos,width=1):
-	return pygame.draw.line(surface,color, list(map(int, start_pos)), list(map(int, end_pos)),int(width))
+	return pygame.draw.line(surface,color, list(map(int, start_pos)), list(map(int, end_pos)),math.ceil(width))
 	
 def polygon(surface,color,pointlist,width=0):
-	return pygame.draw.polygon(surface,color, list(map(int, pointlist)),int(round(width)))
+	return pygame.draw.polygon(surface,color, pointlist,int(round(width)))
 		
 def circle(surface,color,pos,radius,width=0):
 	return pygame.draw.circle(surface,color,list(map(int, pos)),int(radius),int(round(width)))
