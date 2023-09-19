@@ -32,6 +32,9 @@ gamestart = False
 COLOR_KEY = [255,0,255]
 
 terrain = [0]*4
+landcreated = pygame.Surface([2 * width + buff*2, height])
+landcreated.fill(COLOR_KEY)
+landcreated.set_colorkey(COLOR_KEY)
 
 lspds = [0.1,0.2,0.5,1]
 totalMade = [0]*4
@@ -77,9 +80,8 @@ def makeBGLayer(n):
 		terrain[n] = (terrain[n]+1) % 2
 
 
-	print(str(loaded)+"/"+str(allloads))
+	# print(str(loaded)+"/"+str(allloads))
 	return l
-
 
 def mt(LN, *args):
 	global Ls, Lrs, loaded, allloads
@@ -113,8 +115,12 @@ while loaded<allloads:
 scroll = 0
 canvas = pygame.Surface([width/2,height])
 x = 0
+SPEED = 0.5
 
 player = creature.simplePlayer(18 * landDensity, height - land[18] - 10)
+
+locs = [0,0,0,0]
+locrs = [width,width,width,width]
 
 while (True):
 	for event in pygame.event.get():
@@ -123,17 +129,28 @@ while (True):
 
 	screen.fill((255, 255, 255))
 	canvas.fill([240,240,240])
+	
+	for i in range(4):
+		if Ls[i] is not None:
+			canvas.blit(Ls[i],[locs[i]+scroll*lspds[i]-buff,0])
 
-	canvas.blit(Ls[0], (scroll, 0))
-	canvas.blit(Lrs[0], (scroll, 0))
-	canvas.blit(Ls[1], (scroll, 0))
-	canvas.blit(Lrs[1], (scroll, 0))
-	canvas.blit(Ls[2], (scroll, 0))
-	canvas.blit(Lrs[2], (scroll, 0))
-	canvas.blit(Ls[3], (scroll, 0))
-	canvas.blit(Lrs[3], (scroll, 0))
+		if locs[i]+scroll*lspds[i] < -width-buff:
+			locs[i] += width*2
+			t1 = threading.Thread(target=mt, args=(1, i))
+			t1.start()
+			t1.join()
 
-	u.polygon(canvas,(130,130,130),[[0,height]]+[[landloc+i*landDensity,height-land[i]] for i in range(0,len(land))]+[[width/2,height]])
+
+		if Lrs[i] is not None:
+			canvas.blit(Lrs[i],[locrs[i]+scroll*lspds[i]-buff,0])
+
+		if locrs[i]+scroll*lspds[i] < -width-buff:
+			locrs[i] += width*2
+			t2 = threading.Thread(target=mt, args=(2, i))
+			t2.start()
+			t2.join()
+		
+	u.polygon(canvas,(130,130,130),[[0,height]]+[[landloc+i*landDensity,height-land[i]] for i in range(0,len(land))]+[[width/2,height]]) 
 	player.y = height - land[18] - 10
 	player.draw(canvas)
 
@@ -144,8 +161,9 @@ while (True):
 		land.pop(0)
 
 	if pygame.key.get_pressed()[pygame.K_RIGHT]:
-		landloc -= 0.5
-		scroll -= 0.5
+		landloc -= SPEED
+		scroll -= SPEED
 
 	screen.blit(canvas,[0,0])
 	pygame.display.update()	
+	
