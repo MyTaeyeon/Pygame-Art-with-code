@@ -11,6 +11,8 @@ import sys
 
 pygame.init()
 
+clock = pygame.time.Clock()
+
 # setting up variables
 size = width, height = 1280, 320
 buff = 200
@@ -115,7 +117,10 @@ while loaded<allloads:
 scroll = 0
 canvas = pygame.Surface([width/2,height])
 x = 0
-SPEED = 0.5
+SPEED = 3
+
+def onlandY(ox):
+	return height - land[math.ceil(ox // landDensity)] - 10
 
 player = creature.simplePlayer(18 * landDensity, height - land[18] - 10)
 
@@ -126,6 +131,8 @@ while (True):
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			sys.exit()
+
+	clock.tick(60)
 
 	screen.fill((255, 255, 255))
 	canvas.fill([240,240,240])
@@ -151,7 +158,7 @@ while (True):
 			t2.join()
 		
 	u.polygon(canvas,(130,130,130),[[0,height]]+[[landloc+i*landDensity,height-land[i]] for i in range(0,len(land))]+[[width/2,height]]) 
-	player.y = height - land[18] - 10
+	player.update(onlandY(player.x))
 	player.draw(canvas)
 
 	if landloc < -landDensity:
@@ -160,9 +167,23 @@ while (True):
 		landloc += landDensity
 		land.pop(0)
 
-	if pygame.key.get_pressed()[pygame.K_RIGHT]:
-		landloc -= SPEED
-		scroll -= SPEED
+	usercontrol = pygame.key.get_pressed()
+
+	if usercontrol[pygame.K_RIGHT]:
+		if player.x >= 18 * landDensity:
+			player.x = 18 * landDensity
+			landloc -= SPEED
+			scroll -= SPEED
+		else:
+			player.x += SPEED
+	if usercontrol[pygame.K_LEFT]:
+		player.x -= SPEED
+		if player.x < 10:
+			player.x = 10
+	if usercontrol[pygame.K_UP]:
+		if player.jumping == False and player.falling == False:
+			player.jumpy = player.y - 60
+			player.jumping = True
 
 	screen.blit(canvas,[0,0])
 	pygame.display.update()	
