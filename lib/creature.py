@@ -12,38 +12,6 @@ import utilities as u
 
 pygame.init()
 
-# class simplePlayer:
-#     def __init__(self, screen, x, y):
-#         self.screen = screen
-#         self.character_color = (255, 0, 0)  # Đỏ
-#         self.character_radius = 10
-#         self.character_x = x
-#         self.character_y = y
-#         self.move_speed = 5
-#         self.jump_height = -10
-#         self.jump_count = 2  # Số lần nhảy tối đa
-#         self.gravity = 1
-
-#     def draw(self):
-#         pygame.draw.circle(self.screen, self.character_color, (self.character_x, self.character_y), self.character_radius)
-
-#     def move_left(self):
-#         self.character_x -= self.move_speed
-
-#     def move_right(self):
-#         self.character_x += self.move_speed
-
-#     def jump(self):
-#         if self.jump_count > 0:
-#             self.character_y += self.jump_height
-#             self.jump_count -= 1
-
-#     def fall(self):
-#         if self.character_y + self.character_radius * 2 < self.screen.get_height():
-#             self.character_y += self.gravity
-#         else:
-#             self.jump_count = 2  # Reset số lần nhảy khi đạt mặt đất
-
 class simplePlayer:
     def __init__(self, x, y) -> None:
         self.x = x
@@ -84,4 +52,8 @@ class animal():
         pass
 
 if __name__ == "__main__":
-    pass
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
