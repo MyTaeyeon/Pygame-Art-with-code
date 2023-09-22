@@ -2,12 +2,13 @@
 import pygame
 import utilities as u
 import tree 
-import noise
-import creature
+import noise 
+import creature 
 import random
 import math
 import threading
 import sys
+import time
 
 pygame.init()
 
@@ -38,18 +39,18 @@ landcreated = pygame.Surface([2 * width + buff*2, height])
 landcreated.fill(COLOR_KEY)
 landcreated.set_colorkey(COLOR_KEY)
 
-lspds = [0.1,0.2,0.5,1]
+lspds = [0.2,0.4,0.6,1.2]
 totalMade = [0]*4
 
 def makeBGLayer(n):
 	global loaded, allloads, terrain, lspds, totalMade
 	print("Making Background...")
-	l = pygame.Surface([2 * width+buff*2,height])
+	l = pygame.Surface([width+buff*2,height])
 	l.fill(COLOR_KEY)
 	l.set_colorkey(COLOR_KEY)
 
 	if terrain[n] == 0:
-		treesum = 2 * width/(0.0+len(Ls)*treeDensity)
+		treesum = width/(0.0+len(Ls)*treeDensity)
 		for i in range(0,int(treesum)):
 			thetree = [ random.choice([tree.tree2]),
 						random.choice([tree.tree1,tree.tree1,tree.tree2]),
@@ -59,7 +60,7 @@ def makeBGLayer(n):
 			loaded += 1
 	elif terrain[n] == 1:
 
-		treesum = 2 * (width/(0.0+len(Ls)*treeDensity))
+		treesum = (width/(0.0+len(Ls)*treeDensity))
 		for i in range(0,int(math.ceil(treesum/2.0))):
 			thetree = [ random.choice([tree.tree1,tree.tree3]),
 						random.choice([tree.tree1,tree.tree3]),
@@ -87,7 +88,7 @@ def makeBGLayer(n):
 
 def mt(LN, *args):
 	global Ls, Lrs, loaded, allloads
-	allloads = len(args)*(2 * width/(len(Ls)*treeDensity))
+	allloads = len(args)*(width/(len(Ls)*treeDensity))
 	loaded = 0
 	if LN == 1:
 		for a in args:
@@ -117,15 +118,17 @@ while loaded<allloads:
 scroll = 0
 canvas = pygame.Surface([width/2,height])
 x = 0
-SPEED = 3
+SPEED = 10
 
 def onlandY(ox):
 	return height - land[math.ceil(ox // landDensity)] - 10
 
-player = creature.simplePlayer(18 * landDensity, height - land[18] - 10)
+player = creature.simplePlayer(10, height - land[0] - 10)
 
 locs = [0,0,0,0]
 locrs = [width,width,width,width]
+
+t1 = t2 = None
 
 while (True):
 	for event in pygame.event.get():
@@ -143,19 +146,18 @@ while (True):
 
 		if locs[i]+scroll*lspds[i] < -width-buff:
 			locs[i] += width*2
+			# Ls[i] = makeBGLayer(i)
 			t1 = threading.Thread(target=mt, args=(1, i))
 			t1.start()
-			t1.join()
-
 
 		if Lrs[i] is not None:
 			canvas.blit(Lrs[i],[locrs[i]+scroll*lspds[i]-buff,0])
 
 		if locrs[i]+scroll*lspds[i] < -width-buff:
 			locrs[i] += width*2
+			# Lrs[i] = makeBGLayer(i)
 			t2 = threading.Thread(target=mt, args=(2, i))
 			t2.start()
-			t2.join()
 		
 	u.polygon(canvas,(130,130,130),[[0,height]]+[[landloc+i*landDensity,height-land[i]] for i in range(0,len(land))]+[[width/2,height]]) 
 	player.update(onlandY(player.x))
@@ -170,8 +172,8 @@ while (True):
 	usercontrol = pygame.key.get_pressed()
 
 	if usercontrol[pygame.K_RIGHT]:
-		if player.x >= 18 * landDensity:
-			player.x = 18 * landDensity
+		if player.x >= 15 * landDensity:
+			player.x = 15 * landDensity
 			landloc -= SPEED
 			scroll -= SPEED
 		else:
@@ -187,4 +189,3 @@ while (True):
 
 	screen.blit(canvas,[0,0])
 	pygame.display.update()	
-	
