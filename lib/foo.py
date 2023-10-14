@@ -9,6 +9,7 @@ import math
 import threading
 import sys
 import time
+import daynnightloop as filter
 
 pygame.init()
 
@@ -50,7 +51,7 @@ def makeBGLayer(n):
 	l.set_colorkey(COLOR_KEY)
 
 	if terrain[n] == 0:
-		treesum = width/(0.0+len(Ls)*treeDensity)
+		treesum = width/(len(Ls)*treeDensity)
 		for i in range(0,int(treesum)):
 			thetree = [ random.choice([tree.tree2]),
 						random.choice([tree.tree1,tree.tree1,tree.tree2]),
@@ -60,7 +61,7 @@ def makeBGLayer(n):
 			loaded += 1
 	elif terrain[n] == 1:
 
-		treesum = (width/(0.0+len(Ls)*treeDensity))
+		treesum = (width/(len(Ls)*treeDensity))
 		for i in range(0,int(math.ceil(treesum/2.0))):
 			thetree = [ random.choice([tree.tree1,tree.tree3]),
 						random.choice([tree.tree1,tree.tree3]),
@@ -118,7 +119,7 @@ while loaded<allloads:
 scroll = 0
 canvas = pygame.Surface([width/2,height])
 x = 0
-SPEED = 3
+SPEED = 4
 
 def onlandY(ox):
 	return height - land[math.ceil(ox // landDensity)] - 10
@@ -130,12 +131,14 @@ locrs = [width,width,width,width]
 
 t1 = t2 = None
 
+T = 0
+arrows = [creature.Arrow(width // 2 + buff, int(random.random() * 1000 - 100), random.randint(4, 12)) for i in range(20)]
 while (True):
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			sys.exit()
 
-	clock.tick(60)
+	clock.tick(45)
 
 	screen.fill((255, 255, 255))
 	canvas.fill([240,240,240])
@@ -175,10 +178,10 @@ while (True):
 	if usercontrol[pygame.K_RIGHT]:
 		if player.x >= 10 * landDensity:
 			player.x = 10 * landDensity
-			landloc -= SPEED 
+			landloc -= SPEED
 			scroll -= SPEED
 		else:
-			player.vx = SPEED 
+			player.vx = SPEED
 	if usercontrol[pygame.K_LEFT]:
 		player.vx = -SPEED
 		if player.x < 10:
@@ -188,5 +191,25 @@ while (True):
 		player.vy = SPEED * 3.5
 		player.ay = SPEED / 3
 
+	for x in arrows:
+		x.fly()
+		x.draw(canvas)
+
+	if T % 120 == 0:
+		arrows = [creature.Arrow(width // 2 + buff, int(random.random() * 1000 - 100), random.randint(4, 12)) for i in range(20)]
+
+
 	screen.blit(canvas,[0,0])
+     
+	# reflect
+	reflection = canvas#pygame.transform.flip(canvas,False,True)
+	pygame.draw.rect(screen,(180,180,180),[0,height,width/2,50])
+	for i in range(0,2*(screen.get_height()-height),2):
+		screen.blit(reflection,[(math.sin(i*0.5))*i*0.5+(noise.noise(pygame.time.get_ticks()*0.001,i*0.2)-0.5)*20,height+i-1],(0,height-i,width/2,1))
+
+	T += 1
+	# array = [pygame.surfarray.pixels_red(screen),pygame.surfarray.pixels_green(screen),pygame.surfarray.pixels_blue(screen)]
+	# filter.filter(array,T)
+	# del(array)
+
 	pygame.display.update()	
