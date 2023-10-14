@@ -1,4 +1,4 @@
-# Pygame-suvival
+# Pygame-mini-project
 
 ## lib requirement
     python >= 3.10.x
