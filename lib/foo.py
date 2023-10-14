@@ -21,7 +21,7 @@ screen = pygame.display.set_mode([width/2,height+50])#,pygame.FULLSCREEN )
 screen.fill((255, 255, 255))
 pygame.display.set_caption("")
 
-treeDensity = 64
+treeDensity = 32
 landDensity = 32
 
 allloads = 2 * width/treeDensity
@@ -118,7 +118,7 @@ while loaded<allloads:
 scroll = 0
 canvas = pygame.Surface([width/2,height])
 x = 0
-SPEED = 10
+SPEED = 3
 
 def onlandY(ox):
 	return height - land[math.ceil(ox // landDensity)] - 10
@@ -161,6 +161,7 @@ while (True):
 		
 	u.polygon(canvas,(130,130,130),[[0,height]]+[[landloc+i*landDensity,height-land[i]] for i in range(0,len(land))]+[[width/2,height]]) 
 	player.update(onlandY(player.x))
+	player.vx = 0
 	player.draw(canvas)
 
 	if landloc < -landDensity:
@@ -172,20 +173,20 @@ while (True):
 	usercontrol = pygame.key.get_pressed()
 
 	if usercontrol[pygame.K_RIGHT]:
-		if player.x >= 15 * landDensity:
-			player.x = 15 * landDensity
-			landloc -= SPEED
+		if player.x >= 10 * landDensity:
+			player.x = 10 * landDensity
+			landloc -= SPEED 
 			scroll -= SPEED
 		else:
-			player.x += SPEED
+			player.vx = SPEED 
 	if usercontrol[pygame.K_LEFT]:
-		player.x -= SPEED
+		player.vx = -SPEED
 		if player.x < 10:
 			player.x = 10
-	if usercontrol[pygame.K_UP]:
-		if player.jumping == False and player.falling == False:
-			player.jumpy = player.y - 60
-			player.jumping = True
+	if usercontrol[pygame.K_SPACE] and player.stuckinSky == False:
+		player.time = 0
+		player.vy = SPEED * 3.5
+		player.ay = SPEED / 3
 
 	screen.blit(canvas,[0,0])
 	pygame.display.update()	
