@@ -18,7 +18,8 @@ clock = pygame.time.Clock()
 # setting up variables
 size = width, height = 1280, 320
 buff = 200
-screen = pygame.display.set_mode([width/2,height+50])#,pygame.FULLSCREEN )
+screen = pygame.display.set_mode([width/2,height+50])
+# screen = pygame.display.set_mode([width/2,height+50], pygame.FULLSCREEN)
 screen.fill((255, 255, 255))
 pygame.display.set_caption("")
 
@@ -122,7 +123,7 @@ x = 0
 SPEED = 4
 
 def onlandY(ox):
-	return height - land[math.ceil(ox // landDensity)] - 10
+	return height - min(land[math.ceil(ox / landDensity)], land[math.floor(ox / landDensity)]) - 10
 
 player = creature.simplePlayer(10, height - land[0] - 10)
 
@@ -132,7 +133,7 @@ locrs = [width,width,width,width]
 t1 = t2 = None
 
 T = 0
-arrows = [creature.Arrow(width // 2 + buff, int(random.random() * 1000 - 100), random.randint(4, 12)) for i in range(20)]
+arrows = [creature.Arrow(width // 2 + buff, int(random.random() * 1000 - 100), random.randint(4, 12))]
 while (True):
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
@@ -192,11 +193,13 @@ while (True):
 		player.ay = SPEED / 3
 
 	for x in arrows:
-		x.fly()
+		x.fly() 
 		x.draw(canvas)
 
+	if T % 10 == 0:
+		arrows += [creature.Arrow(width // 2 + buff, int(random.random() * 1000 - 100), random.randint(4, 12))]
 	if T % 120 == 0:
-		arrows = [creature.Arrow(width // 2 + buff, int(random.random() * 1000 - 100), random.randint(4, 12)) for i in range(20)]
+		arrows = arrows[5:]
 
 
 	screen.blit(canvas,[0,0])
@@ -213,3 +216,4 @@ while (True):
 	# del(array)
 
 	pygame.display.update()	
+ 
