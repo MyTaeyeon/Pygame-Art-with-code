@@ -4,9 +4,6 @@ import random
 import sys
 import utilities as u
 import noise
-# import lib.utilities as u
-# import lib.noise as noise
-import threading
 
 pygame.init()
 

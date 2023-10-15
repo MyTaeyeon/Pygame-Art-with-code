@@ -8,7 +8,6 @@ import random
 import math
 import threading
 import sys
-import time
 import daynnightloop as filter
 
 pygame.init()
@@ -123,9 +122,9 @@ x = 0
 SPEED = 4
 
 def onlandY(ox):
-	return height - min(land[math.ceil(ox / landDensity)], land[math.floor(ox / landDensity)]) - 10
+	return height - min(land[math.ceil(ox / landDensity)], land[math.floor(ox / landDensity)])
 
-player = creature.simplePlayer(10, height - land[0] - 10)
+player = creature.Player(0, height - land[0])
 
 locs = [0,0,0,0]
 locrs = [width,width,width,width]
@@ -211,9 +210,9 @@ while (True):
 		screen.blit(reflection,[(math.sin(i*0.5))*i*0.5+(noise.noise(pygame.time.get_ticks()*0.001,i*0.2)-0.5)*20,height+i-1],(0,height-i,width/2,1))
 
 	T += 1
-	# array = [pygame.surfarray.pixels_red(screen),pygame.surfarray.pixels_green(screen),pygame.surfarray.pixels_blue(screen)]
-	# filter.filter(array,T)
-	# del(array)
+	array = [pygame.surfarray.pixels_red(screen),pygame.surfarray.pixels_green(screen),pygame.surfarray.pixels_blue(screen)]
+	filter.filter(array,T)
+	del(array)
 
 	pygame.display.update()	
  

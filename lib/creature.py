@@ -7,9 +7,6 @@ import random
 import noise
 import tree
 import utilities as u 
-# import lib.utilities as u
-# import lib.noise as noise
-# import lib.tree as tree
 
 pygame.init()
 screen = pygame.display.set_mode([640, 320])
@@ -48,6 +45,37 @@ class Arrow:
 		self.x += self.v[0]
 		self.y += self.v[1]
 		self.v[1] += self.g
+            
+class Player:
+    def __init__(self, x, y) -> None:
+        self.x = x
+        self.y = y
+        self.ay = 0
+        self.vx = 0
+        self.vy = 0
+        self.color = (140, 140, 140)
+        self.background = (245, 245, 245)
+        self.time = 0
+        self.stuckinSky = False
+    
+    def draw(self, surface):
+        u.polygon(surface, self.color, [[self.x, self.y], [self.x + 20, self.y], [self.x + 20, self.y - 20], [self.x, self.y - 20]])
+        u.polygon(surface, self.background, [[self.x + 6, self.y - 14], [self.x + 7, self.y - 14], [self.x + 6, self.y - 13], [self.x +7, self.y - 13]])
+        u.polygon(surface, self.background, [[self.x + 13, self.y - 14], [self.x + 14, self.y - 14], [self.x + 13, self.y - 13], [self.x + 14, self.y - 13]])
+        u.polygon(surface, self.background, [[self.x + 6, self.y - 7], [self.x + 6, self.y - 6], [self.x + 14, self.y - 6], [self.x + 14, self.y - 7]])
+    
+    def update(self, onland):
+        self.x += self.vx
+        if self.ay == 0:
+            self.y = onland
+        else:
+            self.stuckinSky = True
+            self.time += 1
+            self.y -= self.vy - int(self.ay * (2*self.time - 1) / 2)
+            if self.y > onland:
+                self.y = onland
+                self.ay = 0
+                self.stuckinSky = False
 
 class simplePlayer:
     def __init__(self, x, y) -> None:
