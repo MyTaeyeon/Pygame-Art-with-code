@@ -43,6 +43,8 @@ landcreated.set_colorkey(COLOR_KEY)
 lspds = [0.2,0.4,0.6,1.2]
 totalMade = [0]*4
 
+birds = []
+
 def makeBGLayer(n):
 	global loaded, allloads, terrain, lspds, totalMade
 	print("Making Background...")
@@ -126,6 +128,44 @@ def onlandY(ox):
 
 player = creature.Player(0, height - land[0])
 
+def makeBirds(n):
+	global birds
+	for i in range(0,n):
+		b = creature.Bird(random.randrange(width//2+30,width//2+60),0)
+		b.s = 0.5
+		b.aspd = 0.3
+		b.yo = height
+		b.color = (140,140,140)
+		b.dir = random.choice([1,-1])
+		birds.append(b)
+
+def birdCtrl():
+	global birds, arrows
+	for b in birds:
+		if b.health > 0:
+			if ((abs(player.x - b.x) < 320 and random.random()<0.05) or random.random()<0.0002) and b.on == 0:
+				b.on = 1
+				ra = math.pi/20.0+random.random()*math.pi/6.0*2.1
+				rl = random.choice([3,4,5])
+				b.v=[rl*math.cos(ra),-rl*math.sin(ra)]
+			if b.on == 1:
+				b.simpFly()
+
+				if abs(player.x - b.x) > 160 and random.random()<1:
+					b.v[1] = min(b.v[1]+0.05,0.4)
+				if b.y >= 2:
+					b.on = 0
+
+			else:
+				b.rest()
+				if 0 < b.x < width/2:
+					b.yo=onlandY(b.x) - 3
+
+			if b.x<0 or b.x>width or b.yo<0:
+				birds.remove(b)
+		else:
+			b.fall()
+
 locs = [0,0,0,0]
 locrs = [width,width,width,width]
 
@@ -133,6 +173,7 @@ t1 = t2 = None
 
 T = 0
 arrows = [creature.Arrow(width // 2 + buff, int(random.random() * 1000 - 100), random.randint(4, 12))]
+makeBirds(30)
 while (True):
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
@@ -167,6 +208,9 @@ while (True):
 	player.vx = 0
 	player.draw(canvas)
 
+	for b in birds:
+		b.draw(canvas)
+
 	if landloc < -landDensity:
 		landni += 1
 		land.append(makeLand(landni,maxheight=land[-1] + 20))
@@ -195,11 +239,7 @@ while (True):
 		x.fly() 
 		x.draw(canvas)
 
-	if T % 10 == 0:
-		arrows += [creature.Arrow(width // 2 + buff, int(random.random() * 1000 - 100), random.randint(4, 12))]
-	if T % 120 == 0:
-		arrows = arrows[5:]
-
+	birdCtrl()
 
 	screen.blit(canvas,[0,0])
      
