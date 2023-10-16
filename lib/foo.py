@@ -121,10 +121,13 @@ while loaded<allloads:
 scroll = 0
 canvas = pygame.Surface([width/2,height])
 x = 0
-SPEED = 4
+SPEED = 3
 
 def onlandY(ox):
-	return height - min(land[math.ceil(ox / landDensity)], land[math.floor(ox / landDensity)])
+	if 0 < ox / landDensity < len(land) - 1:
+		return height - min(land[math.ceil(ox / landDensity)], land[math.floor(ox / landDensity)])
+	else:
+		return 320
 
 player = creature.Player(0, height - land[0])
 
@@ -172,15 +175,16 @@ locrs = [width,width,width,width]
 t1 = t2 = None
 
 T = 0
-arrows = [creature.Arrow(width // 2 + buff, int(random.random() * 1000 - 100), random.randint(4, 12))]
-makeBirds(30)
+
+gifts = [creature.goStraight(random.randint(100, width // 2 - 50), random.randint(-30, -10), [random.randint(-6, 6), random.randint(3, 6)]) for i in range(8)]
+cnt = [0] * len(gifts)
 while (True):
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			sys.exit()
 
 	clock.tick(45)
-
+ 
 	screen.fill((255, 255, 255))
 	canvas.fill([240,240,240])
 	
@@ -202,6 +206,28 @@ while (True):
 			# Lrs[i] = makeBGLayer(i)
 			t2 = threading.Thread(target=mt, args=(2, i))
 			t2.start()
+	
+	for j in range(len(gifts)):
+		if cnt[j] == 0:
+			if gifts[j].update(onlandY(gifts[j].x)) =='boom':
+				cnt[j] = 21
+				gifts[j] = [creature.splinter(gifts[j].x + random.randint(-6, 6), gifts[j].y + random.randint(0, 6), 
+								[random.randint(-6, 6), random.randint(-3, -1)], 
+								150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
+			else:
+				u.polygon(canvas, (100, 100, 100), [[gifts[j].x, gifts[j].y], [gifts[j].x + 20, gifts[j].y], [gifts[j].x + 20, gifts[j].y - 20], [gifts[j].x, gifts[j].y - 20]])
+		elif cnt[j] > 1:
+			for i in range(len(gifts[j])):
+				if gifts[j][i] == None:
+					continue
+				if gifts[j][i].update() == 'boom':
+					gifts[j][i] = None
+					cnt[j] -= 1
+				else:
+					gifts[j][i].draw(canvas)
+		else:
+			cnt[j] = 0
+			gifts[j] = creature.goStraight(random.randint(100, width // 2 - 50), random.randint(-30, -10), [random.randint(-6, 6), random.randint(3, 6)])
 		
 	u.polygon(canvas,(130,130,130),[[0,height]]+[[landloc+i*landDensity,height-land[i]] for i in range(0,len(land))]+[[width/2,height]]) 
 	player.update(onlandY(player.x))
@@ -232,13 +258,11 @@ while (True):
 			player.x = 10
 	if usercontrol[pygame.K_SPACE] and player.stuckinSky == False:
 		player.time = 0
-		player.vy = SPEED * 3.5
+		player.vy = SPEED * 4.5
 		player.ay = SPEED / 3
 
-	for x in arrows:
-		x.fly() 
-		x.draw(canvas)
-
+	if T % 1000 == 0:
+		makeBirds(20)
 	birdCtrl()
 
 	screen.blit(canvas,[0,0])
@@ -250,9 +274,9 @@ while (True):
 		screen.blit(reflection,[(math.sin(i*0.5))*i*0.5+(noise.noise(pygame.time.get_ticks()*0.001,i*0.2)-0.5)*20,height+i-1],(0,height-i,width/2,1))
 
 	T += 1
-	array = [pygame.surfarray.pixels_red(screen),pygame.surfarray.pixels_green(screen),pygame.surfarray.pixels_blue(screen)]
-	filter.filter(array,T)
-	del(array)
+	# array = [pygame.surfarray.pixels_red(screen),pygame.surfarray.pixels_green(screen),pygame.surfarray.pixels_blue(screen)]
+	# filter.filter(array,T)
+	# del(array)
 
 	pygame.display.update()	
  

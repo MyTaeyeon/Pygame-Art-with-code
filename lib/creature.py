@@ -11,41 +11,40 @@ import utilities as u
 pygame.init()
 screen = pygame.display.set_mode([640, 320])
 screen.fill((255, 255, 255))
-class Arrow:
-	def __init__(self,x,y, spd):
-		self.color = (150,150,150)
-		self.x = x
-		self.y = y
-		self.l = 40
-		self.a = 0
-		self.spd = spd
-		self.v = [-self.spd,0]
-		self.g = 0.04
-		self.flicker  =  1
-            
-	def calcA(self):
-		return math.degrees(math.atan2(self.v[1],self.v[0]))
-		
-	def calcV(self):
-		return [self.spd*math.cos(math.radians(self.a)), -self.spd*math.sin(math.radians(self.a))]
-		
-		
-	def calcHead(self):
-		return self.x+self.l*math.cos(math.radians(self.a)), self.y+self.l*math.sin(math.radians(self.a))
 
-	def calcFeather(self):
-		return self.x+self.l*0.3*math.cos(math.radians(self.a)), self.y+self.l*0.3*math.sin(math.radians(self.a))
-		
-	def draw(self,surf):
-		u.line(surf,[245,245,245],[self.x,self.y],self.calcFeather(), 4)
-		u.line(surf,self.color,[self.x,self.y],self.calcHead(),random.randrange(0,2)*self.flicker+2)
-		
-	def fly(self):
-		self.a = self.calcA()
-		self.x += self.v[0]
-		self.y += self.v[1]
-		self.v[1] += self.g
-            
+class goStraight:
+    def __init__(self, x, y, v, dir = 1) -> None:
+        self.x = x
+        self.y = y
+        self.v = v
+        # self.spd = spd
+        self.time = 0
+        self.dir = dir
+    
+    def update(self, onland = 0):
+        if self.y*self.dir > onland *self.dir:
+            return 'boom'
+        self.x += self.v[0]
+        self.time += 1
+        self.y += self.v[1]
+        # self.v[0], self.v[1] = self.v[0] * self.spd, self.v[1] * self.spd
+        
+class splinter(goStraight):
+    def __init__(self, x, y, v, color, size, time) -> None:
+        super().__init__(x, y, v, -1)
+        self.color = color
+        self.size = size
+        self.onland = y + v[1]*time
+    
+    def update(self):
+        self.color += random.randint(3, 5)
+        self.size -= 0.1
+        return super().update(self.onland)
+    
+    def draw(self, surface):
+        if 0 < self.color < 255:
+            pygame.draw.polygon(surface, (self.color, self.color, self.color), [[self.x, self.y], [self.x + math.ceil(self.size), self.y], [self.x + math.ceil(self.size), self.y - math.ceil(self.size)], [self.x, self.y - math.ceil(self.size)]])
+    
 class Player:
     def __init__(self, x, y) -> None:
         self.x = x
@@ -146,7 +145,6 @@ class Bird:
             if a[0][0] == "trans":
                 if a[0][1] == "x":
                     self.x+=(a[1][0]-self.x)/float(a[1][1])
-                    #self.dir = (a[1][0]-self.x>0)*2-1
                     self.walk()
                 if a[0][1] == "xt":
                     self.x+=(a[1][0]-self.x)/float(a[1][1])
@@ -170,8 +168,6 @@ class Bird:
             if ti[0] == 0:
                 ti[1](*ti[2])
                 self.timers.remove(ti)
-
-
 
     def addanim(self,skn,rol,dest,t):
         na = [[skn,rol],[dest,t]]
@@ -335,18 +331,33 @@ class Bird:
 
         s.line(surf,cd[12],cd[13])
         s.line(surf,cd[14],cd[15])
-        
+
 if __name__ == "__main__":
-    arrows = [Arrow(100, 100), Arrow(100, 150), Arrow(100, 200)]
+    n = goStraight(100, 100, [3, 3])    
+    m = 0
     
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
+        for even in pygame.event.get():
+            if even.type == pygame.QUIT:
+                pygame.quit() 
                 sys.exit()
-        screen.fill((255, 255, 255))
         
-        for x in arrows:
-            x.draw(screen)
-            x.fly()
+        if m == 0:
+            if n.update(300) =='boom':
+                m = 21
+                n = [splinter(n.x + random.randint(-6, 6), n.y + random.randint(0, 6), 
+                              [random.randint(-6, 6), random.randint(-3, -1)], 
+                              150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
+            else:
+                u.polygon(screen, (150, 150, 150), [[n.x, n.y], [n.x + 20, n.y], [n.x + 20, n.y - 20], [n.x, n.y - 20]])
+        elif m > 1:
+            for i in range(len(n)):
+                if n[i] == None:
+                    continue
+                if n[i].update() == 'boom':
+                    n[i] = None
+                    m -= 1
+                else:
+                    n[i].draw(screen)
+        # screen.fill((255, 255, 255))
         pygame.display.update()
