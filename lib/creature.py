@@ -2,12 +2,9 @@ import pygame
 import math
 import copy
 import random
-import noise
-import utilities as u 
-
-pygame.init()
-screen = pygame.display.set_mode([640, 320])
-screen.fill((255, 255, 255))
+import lib.noise as noise
+import lib.utilities as u 
+import lib.tree as tree
 
 class goStraight:
     def __init__(self, x, y, v, dir = 1) -> None:
@@ -53,24 +50,48 @@ class Player:
         self.background = (245, 245, 245)
         self.time = 0
         self.status = 'onland'
+        self.split = None
+        self.cnt = 0
     
     def draw(self, surface):
-        u.polygon(surface, self.color, [[self.x, self.y], [self.x + 20, self.y], [self.x + 20, self.y - 20], [self.x, self.y - 20]])
-        u.polygon(surface, self.background, [[self.x + 6, self.y - 14], [self.x + 7, self.y - 14], [self.x + 6, self.y - 13], [self.x +7, self.y - 13]])
-        u.polygon(surface, self.background, [[self.x + 13, self.y - 14], [self.x + 14, self.y - 14], [self.x + 13, self.y - 13], [self.x + 14, self.y - 13]])
-        u.polygon(surface, self.background, [[self.x + 6, self.y - 7], [self.x + 6, self.y - 6], [self.x + 14, self.y - 6], [self.x + 14, self.y - 7]])
+        if self.status == 'onland' or self.status == 'insky':
+            u.polygon(surface, self.color, [[self.x, self.y], [self.x + 20, self.y], [self.x + 20, self.y - 20], [self.x, self.y - 20]])
+            u.polygon(surface, self.background, [[self.x + 6, self.y - 14], [self.x + 7, self.y - 14], [self.x + 6, self.y - 13], [self.x +7, self.y - 13]])
+            u.polygon(surface, self.background, [[self.x + 13, self.y - 14], [self.x + 14, self.y - 14], [self.x + 13, self.y - 13], [self.x + 14, self.y - 13]])
+            u.polygon(surface, self.background, [[self.x + 6, self.y - 7], [self.x + 6, self.y - 6], [self.x + 14, self.y - 6], [self.x + 14, self.y - 7]])
+        else:
+            for i in self.split:
+                if i == None:
+                    continue
+                i.draw(surface)
+            pygame.draw.circle(surface, (180, 180, 180), [self.x, self.y], self.time, width=2)
     
     def update(self, onland):
-        self.x += self.vx
         if self.status == 'onland':
+            self.x += self.vx
             self.y = onland
+            return True
         elif self.status == 'insky':
+            self.x += self.vx
             self.time += 1
             self.y -= self.vy - int(self.ay * (2*self.time - 1) / 2)
             if self.y > onland:
                 self.y = onland
                 self.ay = 0
                 self.status = 'onland'
+            return True
+        else:
+            self.time += 3
+            if self.cnt > 1:
+                for i in self.split:
+                    if i == None:
+                        continue
+                    if i.update() == 'boom':
+                        i = None
+                        self.cnt -= 1
+                return True
+            else:
+                return False
 
 class Bird:
     def __init__(self,x,y):
@@ -240,7 +261,7 @@ class Bird:
 
     def draw(self,surf):
         cd = []
-        for i in range(len(self.skel)):
+        for i in range(len(self.skel)): 
             cd.append(self.calcCoord(i)[:2])
         s = self
         s.poly(surf,cd[3],cd[2],cd[5],
@@ -272,3 +293,180 @@ class Bird:
 
         s.line(surf,cd[12],cd[13])
         s.line(surf,cd[14],cd[15])
+
+class Deer(Bird):
+    def __init__(self,x,y,color=(140,140,140),s=1.1):
+        self.x = x
+        self.y = y
+        self.yo = 0
+        self.s = 2
+        self.t = 0
+        self.aspd = 0.05
+        self.animations = [[]]
+        self.timers = []
+        self.health = 100
+        self.phase = "playing"
+        self.skel=[ [-90,10, 1],		
+                    [ 30,15, 2],#1
+                    [  0, 0, 2],
+                    [190,10, 2],
+                    [-20,10, 3],
+                    [ 50,5, 4],#5
+                    [ 30,5, 5],
+                    [-70,10, 2],
+                    [-10,12, 7],
+                    [  0,12, 8],
+                    [-30,12, 7],#10
+                    [ 20,12,10],
+                    [ 70,10, 4],
+                    [ 70,10,12],
+                    [-90,10,13],
+                    [ 45,12,14],#15
+                    [ 85,10,12],
+                    [-90,10,16],
+                    [ 45,12,17],#18
+                ]
+        self.ssk = copy.deepcopy(self.skel)
+        self.s = s
+        self.dir = -1
+        self.horn = pygame.Surface([100*self.s,50*self.s])
+        self.horn.fill([255,0,255])
+        self.horn.set_colorkey([255,0,255])
+        self.color = color
+        self.spd = 0.6
+        self.tx = 0
+
+        tree.drawTree(surf = self.horn,
+                    x = 50*self.s,#cd[1][0]*self.s+self.x,
+                    y = 50*self.s,#cd[1][1]*self.s+self.y+self.yo,
+                    angle = math.pi*2/3,
+                    dangle = lambda dep: 0,#-(random.random()-0.5)*math.pi/3,
+                    
+                    trunk = 0,
+                    dtrunk = lambda dep: 0,#0.8*random.random(),				 				 
+                    
+                    width = 3*self.s*0.6,
+                    dwidth = lambda dep: random.random()*0.1+0.9,
+                    
+                    height = 4*self.s*0.6,
+                    dheight = lambda dep: 1.2*((dep*2)%2)+0.4,#(((dep+1)*2)%2),
+                    
+                    opening = math.pi/6,
+                    dopening = lambda dep: 0.5+random.random()*0.5,
+                    
+                    color = self.color,
+                    depth = 0,
+                    maxdepth = 6)	
+        if self.dir == -1:
+            self.horn = pygame.transform.flip(self.horn,1,0)
+        #pygame.draw.rect(self.horn,(255,0,0),[0,0,self.horn.get_width()/2,self.horn.get_height()],5)
+        self.shorn = self.horn	
+        #self.horn.get_rect().center=(50*self.s,50*self.s)
+        #self.horn = pygame.transform.rotate(self.horn, 90)	
+        #self.horn.get_rect().center=(50*self.s,50*self.s)
+        #print self.horn.get_rect().center
+        #self.horn = pygame.transform.scale(self.horn, (50*self.s,35*self.s))
+    def draw(self,surf):
+        cd = []
+        for i in range(len(self.skel)):
+            cd.append(self.calcCoord(i)[:2])
+            
+        self.poly(surf, cd[2],
+                        [cd[7][0]+2,cd[7][1]+2],  [cd[3][0]+5,cd[3][1]+13],
+                        cd[12],   cd[4],   [cd[4][0]+4,cd[4][1]],   cd[3]
+                        )
+        self.poly(surf, cd[2],   [cd[1][0]-3,cd[1][1]],
+                        [cd[1][0]+1,cd[1][1]-1],   [cd[1][0]+3,cd[1][1]],
+                        [cd[1][0]+2,cd[1][1]+1],   [cd[0][0]+1,cd[0][1]-1],
+                        [cd[0][0]-1,cd[0][1]+1],   [cd[1][0]-1,cd[1][1]+5],
+                        [(cd[2][0]+cd[1][0])/2,(cd[2][1]+cd[1][1])/2+8],
+                        [cd[7][0]+2,cd[7][1]+2],
+                        )			
+        self.poly(surf, cd[2],  [cd[7][0]+2,cd[7][1]],  [cd[8][0]+2,cd[8][1]],
+                        [cd[9][0]+2,cd[9][1]],   [cd[9][0],cd[9][1]],
+                        cd[8],   [cd[7][0]-6,cd[7][1]]
+                        )		
+        self.poly(surf, cd[2],  [cd[7][0]+2,cd[7][1]],  [cd[10][0]+2,cd[10][1]],
+                        [cd[11][0]+2,cd[11][1]],   [cd[11][0],cd[11][1]],
+                        cd[10],   [cd[7][0]-6,cd[7][1]]
+                        )	
+        self.poly(surf, cd[3],cd[2],cd[13],cd[12],cd[4])	
+        self.poly(surf, cd[3],cd[2],cd[16],cd[12],cd[4])
+
+        self.poly(surf, cd[12],cd[13],
+                        [cd[14][0]+2,cd[14][1]],   [cd[15][0]+1,cd[15][1]],
+                        [cd[15][0]-1,cd[15][1]],   [cd[14][0],cd[14][1]],
+                        [(cd[12][0]+cd[14][0])/2+2,(cd[12][1]+cd[14][1])/2]
+                        )
+        self.poly(surf, cd[12],cd[16],
+                        [cd[17][0]+2,cd[17][1]],   [cd[18][0]+1,cd[18][1]],
+                        [cd[18][0]-1,cd[18][1]],   [cd[17][0],cd[17][1]],
+                        [(cd[12][0]+cd[17][0])/2+2,(cd[12][1]+cd[17][1])/2]
+                        )
+                        
+        self.poly(surf, [cd[4][0],cd[4][1]],cd[5],cd[6])
+        cd = []
+        for i in range(len(self.skel)):
+            cd.append(self.calcCoord(i)[:2])
+        #print self.horn.get_width()
+        self.horn = self.shorn
+        #self.tx = (self.tx+0.5)%90.0
+        #a = self.tx
+        a = self.dir*(self.calcCoord(0)[2]+30)
+
+        self.horn = pygame.transform.rotate(self.horn, a)	
+        #cd[1] = [-80,-80]
+        if self.dir == 1:
+            hc = [cd[1][0]*self.s+self.x     - 50*self.s*math.cos(math.radians(90+a))-70*self.s*math.cos(math.radians(45-a)),
+                                    cd[1][1]*self.s+self.y+self.yo        - 68*self.s*math.sin(math.radians(45-a))]
+        else:
+            #hc = [-cd[1][0]*self.s+self.x   - 50*self.s*math.sin(math.radians(a)),
+            #					 cd[1][1]*self.s+self.y+self.yo    - 50*self.s*math.sin(math.radians(a)) - 50*self.s*math.cos(math.radians(a))]			
+            hc = [-cd[1][0]*self.s+self.x   - 50*self.s*math.cos(math.radians(a))-49*self.s*math.sin(math.radians(a)),
+                                    cd[1][1]*self.s+self.y+self.yo  - 50*self.s*math.sin(math.radians(a)) - 49*self.s*math.cos(math.radians(a))]
+
+
+        #pygame.draw.rect(surf,(0,255,0),[hc[0],hc[1],self.horn.get_width()/2,self.horn.get_height()],1)
+        
+        surf.blit(self.horn,[hc[0],hc[1]])
+    def walk(self):
+        s = self
+        s.t += 1
+        
+        s.to(1,0,30-math.cos(s.t*s.aspd*2)*5)
+        s.to(0,0,-85+math.cos(s.t*s.aspd*2)*10)
+        
+        s.to(3,0,190+math.cos(s.t*s.aspd*2)*1)
+        s.to(4,0,-20+math.cos(s.t*s.aspd*2)*2)
+        
+        s.to(6,0,30+math.cos(s.t*s.aspd*1.5)*10)
+        
+        s.to(7,1,9-math.cos(s.t*s.aspd*2)*1)
+        
+        s.to(8,0,-18+math.sin(s.t*s.aspd)*25)
+        s.to(9,0,-20-math.cos(s.t*s.aspd)*20)
+        
+        s.to(10,0,-18+math.sin(s.t*s.aspd+math.pi)*25)
+        s.to(11,0,-20-math.cos(s.t*s.aspd+math.pi)*20)
+        
+        s.to(12,1,7+math.cos(s.t*s.aspd*2)*1)
+        
+        s.to(13,0,75+math.cos(s.t*s.aspd)*15)
+        s.to(14,0,-90+math.cos(s.t*s.aspd)*15)
+        s.to(15,0,55+math.sin(s.t*s.aspd)*2)
+
+        s.to(16,0,75+math.cos(s.t*s.aspd+math.pi)*15)
+        s.to(17,0,-90+math.cos(s.t*s.aspd+math.pi)*20)
+        s.to(18,0,55+math.sin(s.t*s.aspd+math.pi)*2)	
+
+    def rest(self):
+        s = self
+        s.t +=1
+        for i in range(0,len(s.skel)):
+            if i != 6 and i != 1:
+                s.to(i,0,s.ssk[i][0]+noise.noise(i*0.05,s.t*0.05),5)
+        s.to(6,0,30+math.cos(s.t*s.aspd*0.5)*10)
+        
+        noi = max(min((noise.noise(s.t*s.aspd*0.05)-0.4)*40,1),-1)
+        s.to(1,0,-5+noi*50,5)
+        s.to(0,0,-40-noi*40,5)

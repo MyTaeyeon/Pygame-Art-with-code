@@ -9,6 +9,7 @@ import math
 import threading
 import sys
 import daynnightloop as filter
+import pattern
 
 pygame.init()
 
@@ -19,8 +20,13 @@ size = width, height = 1280, 320
 buff = 200
 screen = pygame.display.set_mode([width/2,height+50])
 # screen = pygame.display.set_mode([width/2,height+50], pygame.FULLSCREEN)
-screen.fill((255, 255, 255))
+screen.fill((240, 240, 240))
 pygame.display.set_caption("")
+
+transparent_surface = pygame.Surface((width//2, height+50), pygame.SRCALPHA)
+alpha = 100  # 0.2 * 255
+transparent_surface.fill((255, 255, 255))
+transparent_surface.set_alpha(alpha)
 
 treeDensity = 32
 landDensity = 32
@@ -108,15 +114,25 @@ landloc = 0
 landni = 0
 for landni in range(len(land)):
 	land[landni]=makeLand(landni,maxheight=20+terrain[3]*120)
-
+running = False
 mt(1, 3, 2 , 1, 0)
 
 thread1 = threading.Thread(target=mt, args=(2,  3, 2, 1, 0))
 thread1.start()
 thread1.join()
 
+vine = pattern.Vine(-30,160)
+screen.fill([240,240,240])
+while loaded < allloads-1 and not running == False:
+	for i in range(10):
+		vine.grow(screen)
+	pygame.draw.rect(screen,(240,240,240),[0,170,100,20])
+	u.text(screen,10,height/2+15,"Loading... "+str(loaded)+"/"+str(allloads),(180,180,180))
+	u.line(screen,(180,180,180),[0,height/2],[(float(loaded)/allloads)*width/2,height/2],1)
+	pygame.display.flip()
+
 while loaded<allloads:
-    pass
+	pass
 
 scroll = 0
 canvas = pygame.Surface([width/2,height])
@@ -181,12 +197,17 @@ shape = [None] * len(gifts)
 cnt = [0] * len(gifts)
 phase = 0
 zoff = 0
+running = True
+score = 0
 while (True):
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			sys.exit()
-
+			
 	clock.tick(45)
+
+	if running == False:
+		continue
  
 	screen.fill((255, 255, 255))
 	canvas.fill([240,240,240])
@@ -218,12 +239,16 @@ while (True):
 								[random.randint(-6, 6), random.randint(-3, -1)], 
 								150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
 			else:
-				if r==0 and u.dist(gifts[j].x, gifts[j].y, player.x, player.y) < 30:
-					cnt = 21
+				if u.dist(gifts[j].x, gifts[j].y, player.x, player.y) < 30 and player.status[0] != 'Death':
+					cnt[j] = 21
 					gifts[j] = [creature.splinter(gifts[j].x + random.randint(-6, 6), gifts[j].y + random.randint(0, 6), 
 								[random.randint(-6, 6), random.randint(-3, -1)], 
 								150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
-					r = 1
+					player.status = 'Death'
+					player.split = [creature.splinter(player.x + random.randint(-6, 6), player.y + random.randint(0, 6), 
+								[random.randint(-6, 6), random.randint(-3, -1)], 
+								150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
+					player.cnt = 21
 				else:	
 					# draw gift!!!				
 					vertices = []
@@ -258,7 +283,7 @@ while (True):
 			gifts[j] = creature.goStraight(random.randint(100, width // 2 - 50), random.randint(-30, -10), [random.randint(-6, 6), random.randint(3, 6)])
 		
 	u.polygon(canvas,(130,130,130),[[0,height]]+[[landloc+i*landDensity,height-land[i]] for i in range(0,len(land))]+[[width/2,height]]) 
-	player.update(onlandY(player.x))
+	running = player.update(onlandY(player.x))
 	player.vx = 0
 	player.draw(canvas)
 	usercontrol = pygame.key.get_pressed()
@@ -268,6 +293,7 @@ while (True):
 			player.x = 10 * landDensity
 			landloc -= SPEED
 			scroll -= SPEED
+			score += 1
 		else:
 			player.vx = SPEED
 	if usercontrol[pygame.K_LEFT]:
@@ -280,21 +306,20 @@ while (True):
 		player.vy = SPEED * 4.5
 		player.ay = SPEED / 3
 
-	# for b in birds:
-	# 	b.draw(canvas)
+	for b in birds:
+		b.draw(canvas)
 
 	if landloc < -landDensity:
 		landni += 1
 		land.append(makeLand(landni,maxheight=land[-1] + 20))
 		landloc += landDensity
 		land.pop(0)
-
 	
 
-	# if T % 1000 == 0:
-	# 	makeBirds(20)
-	# birdCtrl()
-
+	if T % 1000 == 0:
+		makeBirds(20)
+	birdCtrl()
+	u.text(canvas,570,10,"SCORE: %d" % score, (100, 100, 100))
 	screen.blit(canvas,[0,0])
      
 	# reflect
@@ -307,6 +332,11 @@ while (True):
 	array = [pygame.surfarray.pixels_red(screen),pygame.surfarray.pixels_green(screen),pygame.surfarray.pixels_blue(screen)]
 	filter.filter(array,T)
 	del(array)
+	if running == False:
+		screen.blit(transparent_surface, (0, 0))
+		font = pygame.font.Font(None, 40) 
+		text = font.render("Score: " + str(score), True, (0, 0, 0))
+		screen.blit(text, (250, 150))
 
 	pygame.display.update()	
  

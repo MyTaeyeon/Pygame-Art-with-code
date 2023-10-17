@@ -1,7 +1,7 @@
 import pygame
 import math
 import random
-import utilities as u
+import lib.utilities as u
 
 pygame.init()
 
