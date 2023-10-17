@@ -1,7 +1,6 @@
 '''
-Polar Perlin Noise Loop
-Daniel Shiffman
-Based on JavaScript:
+Polar Perlin Noise Loop - Daniel Shiffman
+Based on:
     https://thecodingtrain.com/CodingChallenges/136-polar-perlin-noise-loops.html
     https://youtu.be/ZI1dmHv3MeM
     https://editor.p5js.org/codingtrain/sketches/sy1p1vnQn
