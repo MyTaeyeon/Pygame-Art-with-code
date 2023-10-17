@@ -1,9 +1,7 @@
 import pygame
 import math
 import random
-import sys
 import utilities as u
-import noise
 
 pygame.init()
 

@@ -1,11 +1,8 @@
-from typing import Any
 import pygame
-import sys
 import math
 import copy
 import random
 import noise
-import tree
 import utilities as u 
 
 pygame.init()
@@ -43,7 +40,7 @@ class splinter(goStraight):
     
     def draw(self, surface):
         if 0 < self.color < 255:
-            pygame.draw.polygon(surface, (self.color, self.color, self.color), [[self.x, self.y], [self.x + math.ceil(self.size), self.y], [self.x + math.ceil(self.size), self.y - math.ceil(self.size)], [self.x, self.y - math.ceil(self.size)]])
+            u.polygon(surface, (self.color, self.color, self.color), [[self.x, self.y], [self.x + math.ceil(self.size), self.y], [self.x + math.ceil(self.size), self.y - math.ceil(self.size)], [self.x, self.y - math.ceil(self.size)]])
     
 class Player:
     def __init__(self, x, y) -> None:
@@ -55,7 +52,7 @@ class Player:
         self.color = (140, 140, 140)
         self.background = (245, 245, 245)
         self.time = 0
-        self.stuckinSky = False
+        self.status = 'onland'
     
     def draw(self, surface):
         u.polygon(surface, self.color, [[self.x, self.y], [self.x + 20, self.y], [self.x + 20, self.y - 20], [self.x, self.y - 20]])
@@ -65,16 +62,15 @@ class Player:
     
     def update(self, onland):
         self.x += self.vx
-        if self.ay == 0:
+        if self.status == 'onland':
             self.y = onland
-        else:
-            self.stuckinSky = True
+        elif self.status == 'insky':
             self.time += 1
             self.y -= self.vy - int(self.ay * (2*self.time - 1) / 2)
             if self.y > onland:
                 self.y = onland
                 self.ay = 0
-                self.stuckinSky = False
+                self.status = 'onland'
 
 class Bird:
     def __init__(self,x,y):
@@ -118,12 +114,6 @@ class Bird:
         self.t2 = 0
         self.v = [0,0]
         self.on = 0
-
-    def __str__(self):
-        return self.skel
-
-    def super(self):
-        return super(type(self),self)
 
     def calcCoord(self,n):
         if n == self.skel[n][2]:
@@ -169,20 +159,6 @@ class Bird:
                 ti[1](*ti[2])
                 self.timers.remove(ti)
 
-    def addanim(self,skn,rol,dest,t):
-        na = [[skn,rol],[dest,t]]
-        for a in self.animations[-1]:
-            if a[0][0]==na[0][0] and a[0][1]==na[0][1]:
-                a.append(na[1])
-                return
-        self.animations[-1].append(na)
-
-    def animback(self,t,exceptions=[]):
-        for i in range(0,len(self.skel)):
-            if i not in exceptions:
-                self.addanim(i,0,self.ssk[i][0],t)
-                self.addanim(i,1,self.ssk[i][1],t)
-
     def poly(self,surf,*args):
         u.polygon(surf,self.color,list(map(lambda l: [self.x+l[0]*self.s*self.dir,self.y+self.yo+l[1]*self.s], args)))
     def circle(self,surf,pos,radius):
@@ -194,41 +170,6 @@ class Bird:
     def wingCoordToRL(self,n,w,lw=[0,0],lr=0,slr=0):
         self.skel[n][0] = -(180-(-math.degrees(math.atan2(w[1]-lw[1],w[0]-lw[0]))-slr+180-lr))
         self.skel[n][1] = math.sqrt((w[0]-lw[0])**2+(w[1]-lw[1])**2)
-
-    def fly(self):
-        s = self
-        s.t += 1
-
-        s.w1[1] = -1+u.trapwave(s.t*s.aspd)*3
-        s.w2[1] = -2+u.trapwave(s.t*s.aspd)*8
-        s.w3[1] = -1+u.trapwave(s.t*s.aspd+math.pi*0.2)*12
-
-        s.w2[0] = -3+math.sin(s.t*s.aspd-math.pi*0.5)*2
-        s.w3[0] = -12+math.sin(s.t*s.aspd-math.pi*0.5)*3
-
-
-        s.wingCoordToRL(5,s.w1)
-        s.wingCoordToRL(6,s.w2,s.w1,s.skel[5][0])
-        s.wingCoordToRL(7,s.w3,s.w2,s.skel[6][0],s.skel[5][0])
-
-        s.wingCoordToRL(8,s.w1)
-        s.wingCoordToRL(9,s.w2,s.w1,s.skel[5][0])
-        s.wingCoordToRL(10,s.w3,s.w2,s.skel[6][0],s.skel[5][0])
-
-
-        s.to(4,0,-0+math.sin(s.t*s.aspd+math.pi)*10)
-        s.to(1,0,10+math.sin(s.t*s.aspd)*10)
-
-        s.to(12,0,-30)
-        s.to(14,0,-30)
-        s.to(1,1,3)
-
-
-        s.to(13,0,50+math.sin(s.t*s.aspd)*10 + 10*noise.noise(s.t*s.aspd*0.01,1)-5)
-        s.to(15,0,50+math.sin(s.t*s.aspd)*10 + 10*noise.noise(s.t*s.aspd*0.01,2)-5)
-
-        s.x += s.v[0]*s.dir
-        s.y += 0.5*s.v[1]+0.5*s.v[1]*(0.5*(math.sin(s.t*s.aspd)+1))
     
     def simpFly(self):
         s = self
@@ -331,33 +272,3 @@ class Bird:
 
         s.line(surf,cd[12],cd[13])
         s.line(surf,cd[14],cd[15])
-
-if __name__ == "__main__":
-    n = goStraight(100, 100, [3, 3])    
-    m = 0
-    
-    while True:
-        for even in pygame.event.get():
-            if even.type == pygame.QUIT:
-                pygame.quit() 
-                sys.exit()
-        
-        if m == 0:
-            if n.update(300) =='boom':
-                m = 21
-                n = [splinter(n.x + random.randint(-6, 6), n.y + random.randint(0, 6), 
-                              [random.randint(-6, 6), random.randint(-3, -1)], 
-                              150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
-            else:
-                u.polygon(screen, (150, 150, 150), [[n.x, n.y], [n.x + 20, n.y], [n.x + 20, n.y - 20], [n.x, n.y - 20]])
-        elif m > 1:
-            for i in range(len(n)):
-                if n[i] == None:
-                    continue
-                if n[i].update() == 'boom':
-                    n[i] = None
-                    m -= 1
-                else:
-                    n[i].draw(screen)
-        # screen.fill((255, 255, 255))
-        pygame.display.update()

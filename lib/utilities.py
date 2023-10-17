@@ -12,7 +12,6 @@ def polygon(surface,color,pointlist,width=0):
 		
 def circle(surface,color,pos,radius,width=0):
 	return pygame.draw.circle(surface,color,list(map(int, pos)),int(radius),int(round(width)))
-		
 	
 def text(surf,x,y,t,color=(0,0,0),Font=sysf):
 	fs = Font.render(t,False,color)
@@ -28,3 +27,6 @@ def trapwave(x):
 
 def dist(x1,y1,x2,y2):
 	return ((x1-x2)**2+(y1-y2)**2)**0.5
+
+def map_value(value, start1, stop1, start2, stop2):
+	return (value - start1) / (stop1 - start1) * (stop2 - start2) + start2

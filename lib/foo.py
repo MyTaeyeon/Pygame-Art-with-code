@@ -175,9 +175,12 @@ locrs = [width,width,width,width]
 t1 = t2 = None
 
 T = 0
-
-gifts = [creature.goStraight(random.randint(100, width // 2 - 50), random.randint(-30, -10), [random.randint(-6, 6), random.randint(3, 6)]) for i in range(8)]
+r = 0
+gifts = [creature.goStraight(random.randint(100, width // 2 - 50), random.randint(-30, -10), [random.randint(-6, 6), random.randint(3, 6)]) for i in range(7)]
+shape = [None] * len(gifts)
 cnt = [0] * len(gifts)
+phase = 0
+zoff = 0
 while (True):
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
@@ -215,7 +218,32 @@ while (True):
 								[random.randint(-6, 6), random.randint(-3, -1)], 
 								150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
 			else:
-				u.polygon(canvas, (100, 100, 100), [[gifts[j].x, gifts[j].y], [gifts[j].x + 20, gifts[j].y], [gifts[j].x + 20, gifts[j].y - 20], [gifts[j].x, gifts[j].y - 20]])
+				if r==0 and u.dist(gifts[j].x, gifts[j].y, player.x, player.y) < 30:
+					cnt = 21
+					gifts[j] = [creature.splinter(gifts[j].x + random.randint(-6, 6), gifts[j].y + random.randint(0, 6), 
+								[random.randint(-6, 6), random.randint(-3, -1)], 
+								150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
+					r = 1
+				else:	
+					# draw gift!!!				
+					vertices = []
+
+					for a in range(0, int(2 * math.pi / math.radians(5))):
+						a = a * math.radians(5)
+						xoff = math.cos(a + phase) 
+						yoff = math.sin(a + phase) 
+						xoff = u.map_value(xoff, -1, 1, 0, 4.0)
+						yoff = u.map_value(yoff, -1, 1, 0, 4.0)
+						r = u.map_value(noise.noise(xoff, yoff,zoff), 0, 1, 15, 5)
+						x = r * math.cos(a) + gifts[j].x
+						y = r * math.sin(a) + gifts[j].y
+						vertices.append((x, y))
+					
+					u.polygon(canvas, (110, 110, 110), vertices)
+					
+					phase += 0.003
+					zoff += 0.01
+
 		elif cnt[j] > 1:
 			for i in range(len(gifts[j])):
 				if gifts[j][i] == None:
@@ -233,16 +261,6 @@ while (True):
 	player.update(onlandY(player.x))
 	player.vx = 0
 	player.draw(canvas)
-
-	for b in birds:
-		b.draw(canvas)
-
-	if landloc < -landDensity:
-		landni += 1
-		land.append(makeLand(landni,maxheight=land[-1] + 20))
-		landloc += landDensity
-		land.pop(0)
-
 	usercontrol = pygame.key.get_pressed()
 
 	if usercontrol[pygame.K_RIGHT]:
@@ -256,14 +274,26 @@ while (True):
 		player.vx = -SPEED
 		if player.x < 10:
 			player.x = 10
-	if usercontrol[pygame.K_SPACE] and player.stuckinSky == False:
+	if usercontrol[pygame.K_SPACE] and player.status == 'onland':
+		player.status = 'insky'
 		player.time = 0
 		player.vy = SPEED * 4.5
 		player.ay = SPEED / 3
 
-	if T % 1000 == 0:
-		makeBirds(20)
-	birdCtrl()
+	# for b in birds:
+	# 	b.draw(canvas)
+
+	if landloc < -landDensity:
+		landni += 1
+		land.append(makeLand(landni,maxheight=land[-1] + 20))
+		landloc += landDensity
+		land.pop(0)
+
+	
+
+	# if T % 1000 == 0:
+	# 	makeBirds(20)
+	# birdCtrl()
 
 	screen.blit(canvas,[0,0])
      
@@ -274,9 +304,9 @@ while (True):
 		screen.blit(reflection,[(math.sin(i*0.5))*i*0.5+(noise.noise(pygame.time.get_ticks()*0.001,i*0.2)-0.5)*20,height+i-1],(0,height-i,width/2,1))
 
 	T += 1
-	# array = [pygame.surfarray.pixels_red(screen),pygame.surfarray.pixels_green(screen),pygame.surfarray.pixels_blue(screen)]
-	# filter.filter(array,T)
-	# del(array)
+	array = [pygame.surfarray.pixels_red(screen),pygame.surfarray.pixels_green(screen),pygame.surfarray.pixels_blue(screen)]
+	filter.filter(array,T)
+	del(array)
 
 	pygame.display.update()	
  
