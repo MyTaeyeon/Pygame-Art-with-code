@@ -267,23 +267,17 @@ def play():
 									150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
 					else:	
 						# draw gift!!!				
-						vertices = []
+						center_x, center_y = gifts[j].x, gifts[j].y
+						points = []
 
-						for a in range(0, int(2 * math.pi / math.radians(5))):
-							a = a * math.radians(5)
-							xoff = math.cos(a + phase) 
-							yoff = math.sin(a + phase) 
-							xoff = u.map_value(xoff, -1, 1, 0, 20.0)
-							yoff = u.map_value(yoff, -1, 1, 0, 20.0)
-							r = u.map_value(noise.noise(xoff, yoff, zoff), 0, 1, 15, 5)
-							x = r * math.cos(a) + gifts[j].x
-							y = r * math.sin(a) + gifts[j].y
-							vertices.append((x, y))
-						
-						u.polygon(canvas, (110, 110, 110), vertices)
-						
-						phase += 0.003
-						zoff += 0.01
+						for a in range(0, int(2 * math.pi / 0.01)):
+							a = a * 0.01
+							r = random.randint(6, 17)
+							x = r * math.cos(a) + center_x
+							y = r * math.sin(a) + center_y
+							points.append((x, y))
+
+						pygame.draw.lines(canvas, (100, 100, 100), False, points, 1)
 
 			elif cnt[j] > 1:
 				for i in range(len(gifts[j])):
