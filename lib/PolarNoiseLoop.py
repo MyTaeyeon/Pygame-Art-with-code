@@ -9,7 +9,7 @@ Posted to Python by Nguyen Giang (GitHub: MyTaeyeon)
 
 import pygame
 import math
-from lib.noise import noise
+from noise import noise
 
 pygame.init()
 width, height = 400, 400
@@ -19,7 +19,7 @@ phase = 0
 zoff = 0
 
 slider = pygame.Rect(10, height - 30, 200, 20)
-slider_value = 5.0
+slider_value = 3.0
 
 def map_value(value, start1, stop1, start2, stop2):
     return (value - start1) / (stop1 - start1) * (stop2 - start2) + start2
@@ -29,15 +29,8 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEMOTION:
-            if slider.collidepoint(event.pos):
-                if pygame.mouse.get_pressed()[0]:
-                    slider_value = max(0, min(10, (event.pos[0] - slider.left) / slider.width * 10))
 
     screen.fill((0, 0, 0))
-
-    pygame.draw.rect(screen, (255, 255, 255), slider, 2)
-    pygame.draw.rect(screen, (255, 255, 255), (slider.left + slider.width * slider_value / 10, slider.top, 2, 20))
 
     translate_x = width / 2
     translate_y = height / 2

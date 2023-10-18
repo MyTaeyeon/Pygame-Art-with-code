@@ -3,7 +3,7 @@ import math
 import copy
 import random
 import lib.noise as noise
-import lib.utilities as u 
+import lib.utilities as u
 import lib.tree as tree
 
 class goStraight:
@@ -52,26 +52,21 @@ class Player:
         self.status = 'onland'
         self.split = None
         self.cnt = 0
-        self.size = 4
-        self.shape = [[[0, 0], [17, 0], [17, -10], [0, -10]],
-                      [[]]]
-    
-    def spdraw(self, surface):
-        vertices = []
-        for i in range(4):
-            x = self.x + self.size * math.cos(self.angle + i * math.pi / 2)
-            y = self.y + self.size * math.sin(self.angle + i * math.pi / 2)
-            vertices.append((x, y))
+        self.angle = math.pi/2
 
-        # Vẽ hình vuông
-        pygame.draw.polygon(screen, (255, 255, 255), vertices, 2)
-    
     def draw(self, surface):
         if self.status == 'onland' or self.status == 'insky':
-            u.polygon(surface, self.color, [[self.x, self.y], [self.x + 20, self.y], [self.x + 20, self.y - 20], [self.x, self.y - 20]])
-            u.polygon(surface, self.background, [[self.x + 6, self.y - 14], [self.x + 7, self.y - 14], [self.x + 6, self.y - 13], [self.x +7, self.y - 13]])
-            u.polygon(surface, self.background, [[self.x + 13, self.y - 14], [self.x + 14, self.y - 14], [self.x + 13, self.y - 13], [self.x + 14, self.y - 13]])
-            u.polygon(surface, self.background, [[self.x + 6, self.y - 7], [self.x + 6, self.y - 6], [self.x + 14, self.y - 6], [self.x + 14, self.y - 7]])
+            u.circle(surface, self.color, (self.x , self.y - 12), 12)
+            
+            vector = [math.cos(self.angle), math.sin(self.angle)]
+            mounth = [self.x - vector[0] * 6, self.y - 12 - vector[1]*6]
+            u.line(surface, self.background, mounth, [mounth[0] + vector[1] * 4, mounth[1] - vector[0] * 4], 2)
+            u.line(surface, self.background, mounth, [mounth[0] - vector[1] * 4, mounth[1] + vector[0] * 4], 2)
+
+            eye = [self.x - math.cos(self.angle - math.pi/3) * 3, self.y - 12 - math.sin(self.angle - math.pi/3) * 3]
+            u.line(surface, self.background, eye, [eye[0] + vector[0] * 6, eye[1] + vector[1] * 6], 1)
+            eye = [self.x - math.cos(self.angle + math.pi/3) * 3, self.y - 12 - math.sin(self.angle + math.pi/3) * 3]
+            u.line(surface, self.background, eye, [eye[0] + vector[0] * 6, eye[1] + vector[1] * 6], 1)
         else:
             for i in self.split:
                 if i == None:

@@ -115,7 +115,7 @@ def makeBGLayer(n):
 	totalMade[n] += 1
 	if totalMade[n]%int(lspds[n]*10) == 0:
 		terrain[n] = (terrain[n]+1) % 2
-		
+
 	# print(str(loaded)+"/"+str(allloads))
 	return l
 
@@ -256,6 +256,11 @@ def play():
 										[random.randint(-6, 6), random.randint(-3, -1)], 
 										150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
 							player.cnt = 21
+						else:
+							player.status = 'insky'
+							player.time = 0
+							player.vy = SPEED * 4.5
+							player.ay = SPEED / 3
 						cnt[j] = 21
 						gifts[j] = [creature.splinter(gifts[j].x + random.randint(-6, 6), gifts[j].y + random.randint(0, 6), 
 									[random.randint(-6, 6), random.randint(-3, -1)], 
@@ -268,8 +273,8 @@ def play():
 							a = a * math.radians(5)
 							xoff = math.cos(a + phase) 
 							yoff = math.sin(a + phase) 
-							xoff = u.map_value(xoff, -1, 1, 0, 3.0)
-							yoff = u.map_value(yoff, -1, 1, 0, 3.0)
+							xoff = u.map_value(xoff, -1, 1, 0, 20.0)
+							yoff = u.map_value(yoff, -1, 1, 0, 20.0)
 							r = u.map_value(noise.noise(xoff, yoff, zoff), 0, 1, 15, 5)
 							x = r * math.cos(a) + gifts[j].x
 							y = r * math.sin(a) + gifts[j].y
@@ -307,10 +312,12 @@ def play():
 				score += 1
 			else:
 				player.vx = SPEED
+			player.angle += 0.035
 		if usercontrol[pygame.K_LEFT]:
 			player.vx = -SPEED
 			if player.x < 10:
 				player.x = 10
+			player.angle -= 0.035
 		if usercontrol[pygame.K_SPACE] and player.status == 'onland':
 			player.status = 'insky'
 			player.time = 0
@@ -346,7 +353,7 @@ def play():
 		T += 1
 		array = [pygame.surfarray.pixels_red(screen),pygame.surfarray.pixels_green(screen),pygame.surfarray.pixels_blue(screen)]
 		filter.filter(array,T)
-		del(array)
+		del(array) 
 
 		pygame.display.update()	
 	
@@ -369,17 +376,16 @@ def restart():
 				sys.exit()
 			if event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_r:
-					return True
+					return None
 
 		pygame.display.update()	
 
 # game loop =======================================================================================
-loop = True
-while loop:
+while True:
 	scroll = 0
 	birds = []
 	deers = []
-	player = creature.Player(0, height - land[0])
+	player = creature.Player(320, 150)
 	T = 0
 	r = 0
 	gifts = [creature.goStraight(random.randint(-100, width ), random.randint(-30, -10), [random.randint(-6, 6), random.randint(3, 6)]) for i in range(7)]
@@ -392,7 +398,6 @@ while loop:
 
 	thread2 = threading.Thread(target=mt, args=(1,  3, 2, 1, 0))
 	thread2.start()
-
 	thread1 = threading.Thread(target=mt, args=(2,  3, 2, 1, 0))
 	thread1.start()
 
@@ -401,8 +406,8 @@ while loop:
 	for _ in range(10000):
 		vine.grow(screen)
 		pygame.draw.rect(screen,(240,240,240),[0,170,100,20])
-		# u.text(screen,10,height/2+15,"Loading... "+str(loaded)+"/"+str(allloads),(180,180,180))
-		u.text(screen,10,height/2+15,"Loading... ",(180,180,180))
+		u.text(screen,10,height/2+15,"Loading... "+str(int(loaded / allloads / 2 * 100)) + " %",(180,180,180))
+		# u.text(screen,10,height/2+15,"Loading... ",(180,180,180))
 		u.line(screen,(180,180,180),[0,height/2],[(float(loaded)/allloads)*width/2,height/2],1)
 		pygame.display.flip()
 	thread2.join()
@@ -411,4 +416,4 @@ while loop:
 	while loaded<allloads:
 		pass
 	play()
-	loop = restart()
+	restart()

@@ -1,7 +1,7 @@
-# ART, MATH and BLOCK
+# MATH, ART and BLOCK
 
 ## DEPENDENCIES
-    python >= 3.10.7
+    python == 3.10.7
     pygame == 2.5.1
     numpy == 1.25.2
 
@@ -16,18 +16,22 @@ python /path/to/folder/src/main.py
 ```
 
 ## VIDEO
-<!-- https://www.youtube.com/watch?v=mPYeTJd8klQ -->
+https://www.youtube.com/watch?v=mPYeTJd8klQ
 
-## Features
+## FEATURES
 * EVERYTHING Procedurally generated
 * Day-night transition
 * Extremely detailed animations
+* Relaxing music
 
 ## CONTROLS
-* Right arrow: go right
-* Left arrow: go left
-* Space: jump
+* Right arrow `->`: go right
+* Left arrow `<-`: go left
+* Space `[___]`: jump
 * Avoid collisions with blocks; hitting a block will end your game.
-* Try to go as far as possible to beat your previous high score.
+* Try to go as far as possible.
+
+## WANNA OTHER MUSIC
+* Prepare your own music and paste the path in `main.py` line 31
 
 Enjoy!
