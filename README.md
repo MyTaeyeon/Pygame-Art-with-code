@@ -16,7 +16,7 @@ python /path/to/folder/src/main.py
 ```
 
 ## VIDEO
-https://www.youtube.com/watch?v=mPYeTJd8klQ
+
 
 ## FEATURES
 * EVERYTHING Procedurally generated

@@ -6,7 +6,7 @@ import lib.creature as creature
 import random
 import math
 import threading
-import sys
+import sys 
 import lib.daynnightloop as filter
 import lib.pattern as pattern
 
@@ -127,6 +127,7 @@ SPEED = 3
 # animal ==========================================================================================
 birds = []
 deers = []
+cranes = []
 player = creature.Player(0, height - land[0])
 
 def makeBirds(n):
@@ -177,6 +178,19 @@ def makeDeers(n):
 		deer.aspd = 0.15
 		deers.append(deer)
 
+def makeCranes(n):
+	global cranes
+	for j in range(0,n):
+		r = random.randrange(-5,5)
+		crane = creature.Crane(width/2+landDensity+random.randrange(0,200),0)
+		crane.color = (180+r,180+r,180+r)
+		crane.yo = height-150-120*random.random()
+		crane.s = 0.5+random.random()*0.2
+		crane.aspd = 0.05
+		crane.dir = -1
+		crane.t = (j/5.0)*200
+		cranes.append(crane)
+
 def deersCtrl():
 	for d in deers:
 		d.yo = -30+onlandY(max(min(d.x,width/2),0))
@@ -187,6 +201,14 @@ def deersCtrl():
 			d.rest()
 		if d.x<-100:
 			deers.remove(d)
+
+def craneCtrl():
+	global cranes
+	for c in cranes:
+		c.x -= 2*c.s
+		c.fly()
+		if c.x<-100:
+			cranes.remove(c)
 
 # setup for first run =============================================================================
 scroll = None
@@ -219,8 +241,6 @@ def play():
 	
 		screen.fill((255, 255, 255))
 		canvas.fill([240,240,240])
-		for d in deers:
-			d.draw(canvas)
 		
 		for i in range(4):
 			if Ls[i] is not None:
@@ -271,8 +291,8 @@ def play():
 						points = []
 
 						for a in range(0, int(2 * math.pi / 0.01)):
-							a = a * 0.01
-							r = random.randint(6, 17)
+							a = a * 0.01 
+							r = random.randint(1, 17)
 							x = r * math.cos(a) + center_x
 							y = r * math.sin(a) + center_y
 							points.append((x, y))
@@ -281,7 +301,7 @@ def play():
 
 			elif cnt[j] > 1:
 				for i in range(len(gifts[j])):
-					if gifts[j][i] == None:
+					if gifts[j][i] == None:	
 						continue
 					if gifts[j][i].update() == 'boom':
 						gifts[j][i] = None
@@ -306,20 +326,24 @@ def play():
 				score += 1
 			else:
 				player.vx = SPEED
-			player.angle += 0.035
+			player.angle += 0.05
 		if usercontrol[pygame.K_LEFT]:
 			player.vx = -SPEED
 			if player.x < 10:
 				player.x = 10
-			player.angle -= 0.035
+			player.angle -= 0.05
 		if usercontrol[pygame.K_SPACE] and player.status == 'onland':
 			player.status = 'insky'
 			player.time = 0
 			player.vy = SPEED * 4.5
 			player.ay = SPEED / 3
 
+		for d in deers:
+			d.draw(canvas)
 		for b in birds:
 			b.draw(canvas)
+		for c in cranes:
+			c.draw(canvas)
 
 		if landloc < -landDensity:
 			landni += 1
@@ -332,9 +356,12 @@ def play():
 			makeBirds(random.randrange(6,12))
 		if random.random() < 0.0005 and terrain[3] == 0:
 			makeDeers(1)
+		if random.random() < 0.0005 and terrain[3] == 0:
+			makeCranes(5)
 
 		birdCtrl()
 		deersCtrl()
+		craneCtrl()
 		u.text(canvas,570,10,"SCORE: %d" % score, (100, 100, 100))
 		screen.blit(canvas,[0,0])
 		

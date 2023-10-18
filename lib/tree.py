@@ -3,8 +3,6 @@ import math
 import random
 import lib.utilities as u
 
-pygame.init()
-
 def drawTree(**p):
 	if p['depth'] < p['maxdepth']:
 

@@ -1,6 +1,7 @@
 import pygame
 import math
 import random
+import time
 
 # Pygame initialization
 pygame.init()
@@ -15,6 +16,8 @@ white = (255, 255, 255)
 # Create a clock for controlling frame rate
 clock = pygame.time.Clock()
 
+time.sleep(10)
+
 running = True
 while running:
     for event in pygame.event.get():
@@ -28,7 +31,7 @@ while running:
 
     for a in range(0, int(2 * math.pi / 0.01)):
         a = a * 0.01
-        r = random.randint(8, 20)
+        r = random.randint(1, 70)
         x = r * math.cos(a) + center_x
         y = r * math.sin(a) + center_y
         points.append((x, y))

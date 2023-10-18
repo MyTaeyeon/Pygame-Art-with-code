@@ -7,7 +7,6 @@ import sys
 import math
 import lib.utilities as u
 import random
-# import noise
 
 pygame.init()
 
