@@ -229,8 +229,6 @@ score = None
 
 def play():
 	global running, scroll, score, T, gifts, birds, deers, screen, cnt, Lrs, locrs, Ls, locs, SPEED, canvas, terrain, landloc, landni, landDensity
-	phase = 0
-	zoff = 0
 	pygame.mixer.music.play(-1)
 	while running:
 		for event in pygame.event.get():
