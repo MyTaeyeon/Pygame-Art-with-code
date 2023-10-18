@@ -115,28 +115,9 @@ def makeBGLayer(n):
 	totalMade[n] += 1
 	if totalMade[n]%int(lspds[n]*10) == 0:
 		terrain[n] = (terrain[n]+1) % 2
-
-
+		
 	# print(str(loaded)+"/"+str(allloads))
 	return l
-
-# load screen =====================================================================================
-mt(1, 3, 2 , 1, 0)
-
-thread1 = threading.Thread(target=mt, args=(2,  3, 2, 1, 0))
-thread1.start()
-thread1.join()
-
-vine = pattern.Vine(0,160)
-screen.fill([240,240,240])
-
-while loaded<allloads:
-	for i in range(10):
-		vine.grow(screen)
-	pygame.draw.rect(screen,(240,240,240),[0,170,100,20])
-	u.text(screen,10,height/2+15,"Loading... "+str(loaded)+"/"+str(allloads),(180,180,180))
-	u.line(screen,(180,180,180),[0,height/2],[(float(loaded)/allloads)*width/2,height/2],1)
-	pygame.display.flip()
 
 # camera ==========================================================================================
 canvas = pygame.Surface([width/2,height])
@@ -208,201 +189,226 @@ def deersCtrl():
 			deers.remove(d)
 
 # setup for first run =============================================================================
-T = 0
-r = 0
-gifts = [creature.goStraight(random.randint(-100, width ), random.randint(-30, -10), [random.randint(-6, 6), random.randint(3, 6)]) for i in range(7)]
-shape = [None] * len(gifts)
-cnt = [0] * len(gifts)
-phase = 0
-zoff = 0
-running = True
-score = 0
+scroll = None
+birds = None
+deers = None
+player = None
+T = None
+r = None
+gifts = None
+shape = None
+cnt = None
+phase = None
+zoff = None
+running = None
+score = None
 
-pygame.mixer.music.play(-1)
+# Game is running =================================================================================
 
-# game loop =======================================================================================
-while (True):
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
-			sys.exit()
-		if running == False and event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-			running = True
-			scroll = 0
-			birds = []
-			deers = []
-			player = creature.Player(0, height - land[0])
-			T = 0
-			r = 0
-			gifts = [creature.goStraight(random.randint(-100, width ), random.randint(-30, -10), [random.randint(-6, 6), random.randint(3, 6)]) for i in range(7)]
-			shape = [None] * len(gifts)
-			cnt = [0] * len(gifts)
-			phase = 0
-			zoff = 0
-			running = True
-			score = 0
-
-			mt(1, 3, 2 , 1, 0)
-
-			thread1 = threading.Thread(target=mt, args=(2,  3, 2, 1, 0))
-			thread1.start()
-			thread1.join()
-
-			vine = pattern.Vine(0,160)
-			screen.fill([240,240,240])
-
-			while loaded<allloads:
-				for i in range(10):
-					vine.grow(screen)
-				pygame.draw.rect(screen,(240,240,240),[0,170,100,20])
-				u.text(screen,10,height/2+15,"Loading... "+str(loaded)+"/"+str(allloads),(180,180,180))
-				u.line(screen,(180,180,180),[0,height/2],[(float(loaded)/allloads)*width/2,height/2],1)
-				pygame.display.flip()
-
-			pygame.mixer.music.play(-1)
-			
-	clock.tick(45)
-
-	if running == False:
-		continue
- 
-	screen.fill((255, 255, 255))
-	canvas.fill([240,240,240])
-	for d in deers:
-		d.draw(canvas)
+def play():
+	global running, scroll, score, T, gifts, birds, deers, screen, cnt, Lrs, locrs, Ls, locs, SPEED, canvas, terrain, landloc, landni, landDensity
+	phase = 0
+	zoff = 0
+	pygame.mixer.music.play(-1)
+	while running:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				sys.exit()
+				
+		clock.tick(45)
 	
-	for i in range(4):
-		if Ls[i] is not None:
-			canvas.blit(Ls[i],[locs[i]+scroll*lspds[i]-buff,0])
+		screen.fill((255, 255, 255))
+		canvas.fill([240,240,240])
+		for d in deers:
+			d.draw(canvas)
+		
+		for i in range(4):
+			if Ls[i] is not None:
+				canvas.blit(Ls[i],[locs[i]+scroll*lspds[i]-buff,0])
 
-		if locs[i]+scroll*lspds[i] < -width-buff:
-			locs[i] += width*2
-			# Ls[i] = makeBGLayer(i)
-			t1 = threading.Thread(target=mt, args=(1, i))
-			t1.start()
+			if locs[i]+scroll*lspds[i] < -width-buff:
+				locs[i] += width*2
+				# Ls[i] = makeBGLayer(i)
+				t1 = threading.Thread(target=mt, args=(1, i))
+				t1.start()
 
-		if Lrs[i] is not None:
-			canvas.blit(Lrs[i],[locrs[i]+scroll*lspds[i]-buff,0])
+			if Lrs[i] is not None:
+				canvas.blit(Lrs[i],[locrs[i]+scroll*lspds[i]-buff,0])
 
-		if locrs[i]+scroll*lspds[i] < -width-buff:
-			locrs[i] += width*2
-			# Lrs[i] = makeBGLayer(i)
-			t2 = threading.Thread(target=mt, args=(2, i))
-			t2.start()
-	
-	for j in range(len(gifts)):
-		if cnt[j] == 0:
-			if gifts[j].update(onlandY(gifts[j].x)) =='boom':
-				cnt[j] = 21
-				gifts[j] = [creature.splinter(gifts[j].x + random.randint(-6, 6), gifts[j].y + random.randint(0, 6), 
-								[random.randint(-6, 6), random.randint(-3, -1)], 
-								150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
-			else:
-				if u.dist(gifts[j].x, gifts[j].y, player.x, player.y) < 30 and player.status[0] != 'Death':
-					if player.y > gifts[j].y:
-						player.status = 'Death'
-						player.split = [creature.splinter(player.x + random.randint(-6, 6), player.y + random.randint(0, 6), 
-									[random.randint(-6, 6), random.randint(-3, -1)], 
-									150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
-						player.cnt = 21
+			if locrs[i]+scroll*lspds[i] < -width-buff:
+				locrs[i] += width*2
+				# Lrs[i] = makeBGLayer(i)
+				t2 = threading.Thread(target=mt, args=(2, i))
+				t2.start()
+		
+		for j in range(len(gifts)):
+			if cnt[j] == 0:
+				if gifts[j].update(onlandY(gifts[j].x)) =='boom':
 					cnt[j] = 21
 					gifts[j] = [creature.splinter(gifts[j].x + random.randint(-6, 6), gifts[j].y + random.randint(0, 6), 
-								[random.randint(-6, 6), random.randint(-3, -1)], 
-								150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
-				else:	
-					# draw gift!!!				
-					vertices = []
-
-					for a in range(0, int(2 * math.pi / math.radians(5))):
-						a = a * math.radians(5)
-						xoff = math.cos(a + phase) 
-						yoff = math.sin(a + phase) 
-						xoff = u.map_value(xoff, -1, 1, 0, 4.0)
-						yoff = u.map_value(yoff, -1, 1, 0, 4.0)
-						r = u.map_value(noise.noise(xoff, yoff, zoff), 0, 1, 15, 5)
-						x = r * math.cos(a) + gifts[j].x
-						y = r * math.sin(a) + gifts[j].y
-						vertices.append((x, y))
-					
-					u.polygon(canvas, (110, 110, 110), vertices)
-					
-					phase += 0.003
-					zoff += 0.01
-
-		elif cnt[j] > 1:
-			for i in range(len(gifts[j])):
-				if gifts[j][i] == None:
-					continue
-				if gifts[j][i].update() == 'boom':
-					gifts[j][i] = None
-					cnt[j] -= 1
+									[random.randint(-6, 6), random.randint(-3, -1)], 
+									150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
 				else:
-					gifts[j][i].draw(canvas)
-		else:
-			cnt[j] = 0
-			gifts[j] = creature.goStraight(random.randint(100, width // 2 - 50), random.randint(-30, -10), [random.randint(-6, 6), random.randint(3, 6)])
+					if u.dist(gifts[j].x, gifts[j].y, player.x, player.y) < 30 and player.status[0] != 'Death':
+						if player.y > gifts[j].y:
+							player.status = 'Death'
+							player.split = [creature.splinter(player.x + random.randint(-6, 6), player.y + random.randint(0, 6), 
+										[random.randint(-6, 6), random.randint(-3, -1)], 
+										150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
+							player.cnt = 21
+						cnt[j] = 21
+						gifts[j] = [creature.splinter(gifts[j].x + random.randint(-6, 6), gifts[j].y + random.randint(0, 6), 
+									[random.randint(-6, 6), random.randint(-3, -1)], 
+									150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
+					else:	
+						# draw gift!!!				
+						vertices = []
+
+						for a in range(0, int(2 * math.pi / math.radians(5))):
+							a = a * math.radians(5)
+							xoff = math.cos(a + phase) 
+							yoff = math.sin(a + phase) 
+							xoff = u.map_value(xoff, -1, 1, 0, 3.0)
+							yoff = u.map_value(yoff, -1, 1, 0, 3.0)
+							r = u.map_value(noise.noise(xoff, yoff, zoff), 0, 1, 15, 5)
+							x = r * math.cos(a) + gifts[j].x
+							y = r * math.sin(a) + gifts[j].y
+							vertices.append((x, y))
+						
+						u.polygon(canvas, (110, 110, 110), vertices)
+						
+						phase += 0.003
+						zoff += 0.01
+
+			elif cnt[j] > 1:
+				for i in range(len(gifts[j])):
+					if gifts[j][i] == None:
+						continue
+					if gifts[j][i].update() == 'boom':
+						gifts[j][i] = None
+						cnt[j] -= 1
+					else:
+						gifts[j][i].draw(canvas)
+			else:
+				cnt[j] = 0
+				gifts[j] = creature.goStraight(random.randint(100, width // 2 - 50), random.randint(-30, -10), [random.randint(-6, 6), random.randint(3, 6)])
+			
+		u.polygon(canvas,(130,130,130),[[0,height]]+[[landloc+i*landDensity,height-land[i]] for i in range(0,len(land))]+[[width/2,height]]) 
+		running = player.update(onlandY(player.x))
+		player.vx = 0
+		player.draw(canvas)
+		usercontrol = pygame.key.get_pressed()
+
+		if usercontrol[pygame.K_RIGHT]:
+			if player.x >= 10 * landDensity:
+				player.x = 10 * landDensity
+				landloc -= SPEED
+				scroll -= SPEED
+				score += 1
+			else:
+				player.vx = SPEED
+		if usercontrol[pygame.K_LEFT]:
+			player.vx = -SPEED
+			if player.x < 10:
+				player.x = 10
+		if usercontrol[pygame.K_SPACE] and player.status == 'onland':
+			player.status = 'insky'
+			player.time = 0
+			player.vy = SPEED * 4.5
+			player.ay = SPEED / 3
+
+		for b in birds:
+			b.draw(canvas)
+
+		if landloc < -landDensity:
+			landni += 1
+			land.append(makeLand(landni,maxheight=land[-1] + 20))
+			landloc += landDensity
+			land.pop(0)
 		
-	u.polygon(canvas,(130,130,130),[[0,height]]+[[landloc+i*landDensity,height-land[i]] for i in range(0,len(land))]+[[width/2,height]]) 
-	running = player.update(onlandY(player.x))
-	player.vx = 0
-	player.draw(canvas)
-	usercontrol = pygame.key.get_pressed()
 
-	if usercontrol[pygame.K_RIGHT]:
-		if player.x >= 10 * landDensity:
-			player.x = 10 * landDensity
-			landloc -= SPEED
-			scroll -= SPEED
-			score += 1
-		else:
-			player.vx = SPEED
-	if usercontrol[pygame.K_LEFT]:
-		player.vx = -SPEED
-		if player.x < 10:
-			player.x = 10
-	if usercontrol[pygame.K_SPACE] and player.status == 'onland':
-		player.status = 'insky'
-		player.time = 0
-		player.vy = SPEED * 4.5
-		player.ay = SPEED / 3
+		if random.random()<0.0005:
+			makeBirds(random.randrange(6,12))
+		if random.random() < 0.0005 and terrain[3] == 0:
+			makeDeers(1)
 
-	for b in birds:
-		b.draw(canvas)
+		birdCtrl()
+		deersCtrl()
+		u.text(canvas,570,10,"SCORE: %d" % score, (100, 100, 100))
+		screen.blit(canvas,[0,0])
+		
+		# reflect
+		reflection = canvas#pygame.transform.flip(canvas,False,True)
+		pygame.draw.rect(screen,(180,180,180),[0,height,width/2,50])
+		for i in range(0,2*(screen.get_height()-height),2):
+			screen.blit(reflection,[(math.sin(i*0.5))*i*0.5+(noise.noise(pygame.time.get_ticks()*0.001,i*0.2)-0.5)*20,height+i-1],(0,height-i,width/2,1))
 
-	if landloc < -landDensity:
-		landni += 1
-		land.append(makeLand(landni,maxheight=land[-1] + 20))
-		landloc += landDensity
-		land.pop(0)
+		T += 1
+		array = [pygame.surfarray.pixels_red(screen),pygame.surfarray.pixels_green(screen),pygame.surfarray.pixels_blue(screen)]
+		filter.filter(array,T)
+		del(array)
+
+		pygame.display.update()	
 	
+	screen.blit(transparent_surface, (0, 0))
+	font = pygame.font.Font(None, 40) 
+	text = font.render("Score: " + str(score), True, (255, 255, 255))
+	screen.blit(text, (250, 150))
+	font = pygame.font.Font(None, 20) 
+	text = font.render("press r to restart", True, (255, 255, 255))
+	screen.blit(text, (250, 180))
+	pygame.mixer.music.stop()
 
-	if random.random()<0.0005:
-		makeBirds(random.randrange(6,12))
-	if random.random() < 0.0005 and terrain[3] == 0:
-		makeDeers(1)
+# restart or exit =================================================================================
 
-	birdCtrl()
-	deersCtrl()
-	u.text(canvas,570,10,"SCORE: %d" % score, (100, 100, 100))
-	screen.blit(canvas,[0,0])
-     
-	# reflect
-	reflection = canvas#pygame.transform.flip(canvas,False,True)
-	pygame.draw.rect(screen,(180,180,180),[0,height,width/2,50])
-	for i in range(0,2*(screen.get_height()-height),2):
-		screen.blit(reflection,[(math.sin(i*0.5))*i*0.5+(noise.noise(pygame.time.get_ticks()*0.001,i*0.2)-0.5)*20,height+i-1],(0,height-i,width/2,1))
+def restart():
+	while True:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				sys.exit()
+			if event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_r:
+					return True
 
-	T += 1
-	array = [pygame.surfarray.pixels_red(screen),pygame.surfarray.pixels_green(screen),pygame.surfarray.pixels_blue(screen)]
-	filter.filter(array,T)
-	del(array)
-	if running == False:
-		screen.blit(transparent_surface, (0, 0))
-		font = pygame.font.Font(None, 40) 
-		text = font.render("Score: " + str(score), True, (255, 255, 255))
-		screen.blit(text, (250, 150))
-		font = pygame.font.Font(None, 20) 
-		text = font.render("press r to restart", True, (255, 255, 255))
-		screen.blit(text, (250, 180))
-		pygame.mixer.music.stop()
+		pygame.display.update()	
 
-	pygame.display.update()	
+# game loop =======================================================================================
+loop = True
+while loop:
+	scroll = 0
+	birds = []
+	deers = []
+	player = creature.Player(0, height - land[0])
+	T = 0
+	r = 0
+	gifts = [creature.goStraight(random.randint(-100, width ), random.randint(-30, -10), [random.randint(-6, 6), random.randint(3, 6)]) for i in range(7)]
+	shape = [None] * len(gifts)
+	cnt = [0] * len(gifts)
+	phase = 0
+	zoff = 0
+	running = True
+	score = 0
+
+	thread2 = threading.Thread(target=mt, args=(1,  3, 2, 1, 0))
+	thread2.start()
+
+	thread1 = threading.Thread(target=mt, args=(2,  3, 2, 1, 0))
+	thread1.start()
+
+	vine = pattern.Vine(0,160)
+	screen.fill([240,240,240])
+	for _ in range(10000):
+		vine.grow(screen)
+		pygame.draw.rect(screen,(240,240,240),[0,170,100,20])
+		# u.text(screen,10,height/2+15,"Loading... "+str(loaded)+"/"+str(allloads),(180,180,180))
+		u.text(screen,10,height/2+15,"Loading... ",(180,180,180))
+		u.line(screen,(180,180,180),[0,height/2],[(float(loaded)/allloads)*width/2,height/2],1)
+		pygame.display.flip()
+	thread2.join()
+	thread1.join()
+
+	while loaded<allloads:
+		pass
+	play()
+	loop = restart()
