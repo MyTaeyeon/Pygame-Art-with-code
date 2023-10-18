@@ -315,7 +315,6 @@ while (True):
 		landloc += landDensity
 		land.pop(0)
 	
-
 	if T % 1000 == 0:
 		makeBirds(20)
 	birdCtrl()
@@ -339,4 +338,3 @@ while (True):
 		screen.blit(text, (250, 150))
 
 	pygame.display.update()	
- 

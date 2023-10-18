@@ -23,10 +23,13 @@ pygame.display.set_caption("")
 
 transparent_surface = pygame.Surface((width//2, height+50), pygame.SRCALPHA)
 alpha = 100  # 0.2 * 255
-transparent_surface.fill((255, 255, 255))
+transparent_surface.fill((30, 30, 30))
 transparent_surface.set_alpha(alpha)
 
 COLOR_KEY = [255,0,255]
+
+pygame.mixer.music.load('courageously-166375.mp3')
+pygame.mixer.music.set_volume(0.3)
 
 # terrain =========================================================================================
 treeDensity = 32
@@ -39,9 +42,6 @@ Ls = [None]*4
 Lrs = [None]*4
 
 terrain = [0]*4
-landcreated = pygame.Surface([2 * width + buff*2, height])
-landcreated.fill(COLOR_KEY)
-landcreated.set_colorkey(COLOR_KEY)
 
 lspds = [0.2,0.4,0.6,1.2]
 totalMade = [0]*4
@@ -129,7 +129,8 @@ thread1.join()
 
 vine = pattern.Vine(0,160)
 screen.fill([240,240,240])
-while loaded < allloads-1:
+
+while loaded<allloads:
 	for i in range(10):
 		vine.grow(screen)
 	pygame.draw.rect(screen,(240,240,240),[0,170,100,20])
@@ -137,13 +138,9 @@ while loaded < allloads-1:
 	u.line(screen,(180,180,180),[0,height/2],[(float(loaded)/allloads)*width/2,height/2],1)
 	pygame.display.flip()
 
-while loaded<allloads:
-	pass
-
 # camera ==========================================================================================
-scroll = 0
 canvas = pygame.Surface([width/2,height])
-x = 0
+scroll = 0
 SPEED = 3
 
 # animal ==========================================================================================
@@ -221,11 +218,47 @@ zoff = 0
 running = True
 score = 0
 
+pygame.mixer.music.play(-1)
+
 # game loop =======================================================================================
 while (True):
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			sys.exit()
+		if running == False and event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+			running = True
+			scroll = 0
+			birds = []
+			deers = []
+			player = creature.Player(0, height - land[0])
+			T = 0
+			r = 0
+			gifts = [creature.goStraight(random.randint(-100, width ), random.randint(-30, -10), [random.randint(-6, 6), random.randint(3, 6)]) for i in range(7)]
+			shape = [None] * len(gifts)
+			cnt = [0] * len(gifts)
+			phase = 0
+			zoff = 0
+			running = True
+			score = 0
+
+			mt(1, 3, 2 , 1, 0)
+
+			thread1 = threading.Thread(target=mt, args=(2,  3, 2, 1, 0))
+			thread1.start()
+			thread1.join()
+
+			vine = pattern.Vine(0,160)
+			screen.fill([240,240,240])
+
+			while loaded<allloads:
+				for i in range(10):
+					vine.grow(screen)
+				pygame.draw.rect(screen,(240,240,240),[0,170,100,20])
+				u.text(screen,10,height/2+15,"Loading... "+str(loaded)+"/"+str(allloads),(180,180,180))
+				u.line(screen,(180,180,180),[0,height/2],[(float(loaded)/allloads)*width/2,height/2],1)
+				pygame.display.flip()
+
+			pygame.mixer.music.play(-1)
 			
 	clock.tick(45)
 
@@ -234,6 +267,8 @@ while (True):
  
 	screen.fill((255, 255, 255))
 	canvas.fill([240,240,240])
+	for d in deers:
+		d.draw(canvas)
 	
 	for i in range(4):
 		if Ls[i] is not None:
@@ -263,15 +298,16 @@ while (True):
 								150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
 			else:
 				if u.dist(gifts[j].x, gifts[j].y, player.x, player.y) < 30 and player.status[0] != 'Death':
+					if player.y > gifts[j].y:
+						player.status = 'Death'
+						player.split = [creature.splinter(player.x + random.randint(-6, 6), player.y + random.randint(0, 6), 
+									[random.randint(-6, 6), random.randint(-3, -1)], 
+									150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
+						player.cnt = 21
 					cnt[j] = 21
 					gifts[j] = [creature.splinter(gifts[j].x + random.randint(-6, 6), gifts[j].y + random.randint(0, 6), 
 								[random.randint(-6, 6), random.randint(-3, -1)], 
 								150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
-					player.status = 'Death'
-					player.split = [creature.splinter(player.x + random.randint(-6, 6), player.y + random.randint(0, 6), 
-								[random.randint(-6, 6), random.randint(-3, -1)], 
-								150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
-					player.cnt = 21
 				else:	
 					# draw gift!!!				
 					vertices = []
@@ -282,7 +318,7 @@ while (True):
 						yoff = math.sin(a + phase) 
 						xoff = u.map_value(xoff, -1, 1, 0, 4.0)
 						yoff = u.map_value(yoff, -1, 1, 0, 4.0)
-						r = u.map_value(noise.noise(xoff, yoff,zoff), 0, 1, 15, 5)
+						r = u.map_value(noise.noise(xoff, yoff, zoff), 0, 1, 15, 5)
 						x = r * math.cos(a) + gifts[j].x
 						y = r * math.sin(a) + gifts[j].y
 						vertices.append((x, y))
@@ -331,8 +367,6 @@ while (True):
 
 	for b in birds:
 		b.draw(canvas)
-	for d in deers:
-		d.draw(canvas)
 
 	if landloc < -landDensity:
 		landni += 1
@@ -364,7 +398,11 @@ while (True):
 	if running == False:
 		screen.blit(transparent_surface, (0, 0))
 		font = pygame.font.Font(None, 40) 
-		text = font.render("Score: " + str(score), True, (0, 0, 0))
+		text = font.render("Score: " + str(score), True, (255, 255, 255))
 		screen.blit(text, (250, 150))
+		font = pygame.font.Font(None, 20) 
+		text = font.render("press r to restart", True, (255, 255, 255))
+		screen.blit(text, (250, 180))
+		pygame.mixer.music.stop()
 
 	pygame.display.update()	

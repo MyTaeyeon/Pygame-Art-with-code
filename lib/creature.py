@@ -52,6 +52,19 @@ class Player:
         self.status = 'onland'
         self.split = None
         self.cnt = 0
+        self.size = 4
+        self.shape = [[[0, 0], [17, 0], [17, -10], [0, -10]],
+                      [[]]]
+    
+    def spdraw(self, surface):
+        vertices = []
+        for i in range(4):
+            x = self.x + self.size * math.cos(self.angle + i * math.pi / 2)
+            y = self.y + self.size * math.sin(self.angle + i * math.pi / 2)
+            vertices.append((x, y))
+
+        # Vẽ hình vuông
+        pygame.draw.polygon(screen, (255, 255, 255), vertices, 2)
     
     def draw(self, surface):
         if self.status == 'onland' or self.status == 'insky':
@@ -104,7 +117,7 @@ class Bird:
         self.color = (150,150,150)
         self.animations = [[]]
         self.dir = 1
-        self.spd = 0.5
+        self.spd = 2
         self.timers = []
         self.health = 100
         self.skel=[ [ -60, 5, 1],
@@ -333,7 +346,7 @@ class Deer(Bird):
         self.horn.fill([255,0,255])
         self.horn.set_colorkey([255,0,255])
         self.color = color
-        self.spd = 0.6
+        self.spd = 2.4
         self.tx = 0
 
         tree.drawTree(surf = self.horn,
