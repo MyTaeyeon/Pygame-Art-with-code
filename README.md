@@ -10,7 +10,7 @@ Download the project. In terminal, type:
 ```bash
 py /path/to/folder/src/main.py
 ```
-Maybe:
+Or:
 ```bash
 python /path/to/folder/src/main.py
 ```
