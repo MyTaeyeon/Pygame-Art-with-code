@@ -75,6 +75,20 @@ def onlandY(ox):
 locs = [0,0,0,0]
 locrs = [width,width,width,width]
 
+# set icon ========================================================================================
+scheme = [(70,69,63),(225,225,210)]
+icon = pygame.Surface([512,512])
+icon.set_colorkey(COLOR_KEY)
+
+def Icon():
+	global icon, scheme
+	icon.fill(scheme[1])
+	pygame.draw.rect(icon,scheme[0],[0,0,512,512],50)
+	pygame.draw.circle(icon, (255, 255, 255), (256, 256), 100)
+	pygame.display.set_icon(icon)
+
+Icon()
+
 # background ======================================================================================
 def makeBGLayer(n):
 	global loaded, allloads, terrain, lspds, totalMade
@@ -239,6 +253,13 @@ def play():
 	
 		screen.fill((255, 255, 255))
 		canvas.fill([240,240,240])
+
+		for d in deers:
+			d.draw(canvas)
+		for b in birds:
+			b.draw(canvas)
+		for c in cranes:
+			c.draw(canvas)
 		
 		for i in range(4):
 			if Ls[i] is not None:
@@ -335,13 +356,6 @@ def play():
 			player.time = 0
 			player.vy = SPEED * 4.5
 			player.ay = SPEED / 3
-
-		for d in deers:
-			d.draw(canvas)
-		for b in birds:
-			b.draw(canvas)
-		for c in cranes:
-			c.draw(canvas)
 
 		if landloc < -landDensity:
 			landni += 1
