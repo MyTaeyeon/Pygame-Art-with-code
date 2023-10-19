@@ -19,9 +19,7 @@ python /path/to/folder/src/main.py
 Processing...
 
 ## WILL U CONTRIBUTE TO
-✅ I'm good &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⚠️ Yesn't
-<br>
-====== list ====== <br>
+[Imgur](https://i.imgur.com/IrB9DEV.jpg)
 ✅ Background <br>
 ✅ Enemy <br>
 ✅ Animals <br>
