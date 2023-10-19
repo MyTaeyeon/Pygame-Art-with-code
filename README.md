@@ -26,6 +26,7 @@ Processing...
 ✅ Background <br>
 ✅ Enemy <br>
 ✅ Animals <br>
+⚠️ Animals move <br>
 ✅ Day and night loop <br>
 ✅ Infinity land <br>
 ☑️ Loading screen <br>
