@@ -19,7 +19,7 @@ python /path/to/folder/src/main.py
 Processing...
 
 ## WILL U CONTRIBUTE TO
-[Imgur](https://i.imgur.com/IrB9DEV.jpg)
+<img src="https://i.imgur.com/IrB9DEV.jpg" alt="Imugr" width="300"><br>
 ✅ Background <br>
 ✅ Enemy <br>
 ✅ Animals <br>
