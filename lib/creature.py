@@ -52,7 +52,7 @@ class Player:
         self.status = 'onland'
         self.split = None
         self.cnt = 0
-        self.angle = math.pi/2
+        self.angle = -math.pi/2
 
     def draw(self, surface):
         if self.status == 'onland' or self.status == 'insky':

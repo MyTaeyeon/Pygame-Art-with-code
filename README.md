@@ -5,28 +5,31 @@
     pygame == 2.5.1
     numpy == 1.25.2
 
-## HOW TO RUN
+## HOW TO RUN IN WINDOW
 Download the project. In terminal, type:
 ```bash
-py /path/to/folder/src/main.py
+py \path\to\folder\main.py
 ```
-Maybe:
+Or:
 ```bash
-python /path/to/folder/src/main.py
+python \path\to\folder\main.py
 ```
 
 ## VIDEO
 Processing...
 
-## WILL U CONTRIBUTE TO
+## CONTRIBUTE TO THIS PROJECT
+* Sign and meaning:
+
 <img src="https://i.imgur.com/IrB9DEV.jpg" alt="Imugr" width="300"><br>
+* &nbsp;<br>
 ✅ Background <br>
 ✅ Enemy <br>
 ✅ Animals <br>
 ✅ Day and night loop <br>
 ✅ Infinity land <br>
 ☑️ Loading screen <br>
-☑️ Death animation <br>
+✅ Death animation <br>
 ☑️ Icon <br>
 ⚠️ Player shape <br>
 
@@ -40,7 +43,9 @@ Processing...
 * Right arrow `->`: go right
 * Left arrow `<-`: go left
 * Space `[___]`: jump
-* Avoid collisions with blocks; hitting a block will end your game.
+* Key `r` : restart
+* You cannot go left out of screen
+* Avoid collisions with blocks
 * Try to go as far as possible.
 
 ## WANNA OTHER MUSIC

@@ -253,13 +253,6 @@ def play():
 	
 		screen.fill((255, 255, 255))
 		canvas.fill([240,240,240])
-
-		for d in deers:
-			d.draw(canvas)
-		for b in birds:
-			b.draw(canvas)
-		for c in cranes:
-			c.draw(canvas)
 		
 		for i in range(4):
 			if Ls[i] is not None:
@@ -279,7 +272,14 @@ def play():
 				# Lrs[i] = makeBGLayer(i)
 				t2 = threading.Thread(target=mt, args=(2, i))
 				t2.start()
-		
+
+		for d in deers:
+			d.draw(canvas)
+		for b in birds:
+			b.draw(canvas)
+		for c in cranes:
+			c.draw(canvas)
+
 		for j in range(len(gifts)):
 			if cnt[j] == 0:
 				if gifts[j].update(onlandY(gifts[j].x)) =='boom':
@@ -288,8 +288,8 @@ def play():
 									[random.randint(-6, 6), random.randint(-3, -1)], 
 									150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
 				else:
-					if u.dist(gifts[j].x, gifts[j].y, player.x, player.y) < 30 and player.status[0] != 'Death':
-						if player.y > gifts[j].y:
+					if u.dist(gifts[j].x, gifts[j].y, player.x, player.y - 12) < 29 and player.status[0] != 'Death':
+						if player.y - 12 >= gifts[j].y:
 							player.status = 'Death'
 							player.split = [creature.splinter(player.x + random.randint(-6, 6), player.y + random.randint(0, 6), 
 										[random.randint(-6, 6), random.randint(-3, -1)], 
@@ -298,7 +298,7 @@ def play():
 						else:
 							player.status = 'insky'
 							player.time = 0
-							player.vy = SPEED * 4.5
+							player.vy = SPEED * 4
 							player.ay = SPEED / 3
 						cnt[j] = 21
 						gifts[j] = [creature.splinter(gifts[j].x + random.randint(-6, 6), gifts[j].y + random.randint(0, 6), 
@@ -330,11 +330,13 @@ def play():
 			else:
 				cnt[j] = 0
 				gifts[j] = creature.goStraight(random.randint(100, width // 2 - 50), random.randint(-30, -10), [random.randint(-6, 6), random.randint(3, 6)])
-			
-		u.polygon(canvas,(130,130,130),[[0,height]]+[[landloc+i*landDensity,height-land[i]] for i in range(0,len(land))]+[[width/2,height]]) 
+
 		running = player.update(onlandY(player.x))
 		player.vx = 0
 		player.draw(canvas)
+
+		u.polygon(canvas,(130,130,130),[[0,height]]+[[landloc+i*landDensity,height-land[i]] for i in range(0,len(land))]+[[width/2,height]]) 
+
 		usercontrol = pygame.key.get_pressed()
 
 		if usercontrol[pygame.K_RIGHT]:
@@ -418,7 +420,11 @@ while True:
 	scroll = 0
 	birds = []
 	deers = []
-	player = creature.Player(320, 150)
+	player = creature.Player(320, 250)
+	player.status = 'insky'
+	player.time = 5
+	player.vy = SPEED * 4.5
+	player.ay = SPEED / 3
 	T = 0
 	r = 0
 	gifts = [creature.goStraight(random.randint(-100, width ), random.randint(-30, -10), [random.randint(-6, 6), random.randint(3, 6)]) for i in range(7)]
