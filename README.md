@@ -1,4 +1,4 @@
-# MATH, ART and BLOCK
+# ART WITH CODE
 
 ## DEPENDENCIES
     python == 3.10.7
@@ -16,7 +16,21 @@ python /path/to/folder/src/main.py
 ```
 
 ## VIDEO
+Processing...
 
+## WILL U CONTRIBUTE TO
+✅ I'm good &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⚠️ Yesn't
+<br>
+====== list ====== <br>
+✅ Background <br>
+✅ Enemy <br>
+✅ Animals <br>
+✅ Day and night loop <br>
+✅ Infinity land <br>
+☑️ Loading screen <br>
+☑️ Death animation <br>
+☑️ Icon <br>
+⚠️ Player shape <br>
 
 ## FEATURES
 * EVERYTHING Procedurally generated
