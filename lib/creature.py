@@ -557,7 +557,7 @@ class Firefly:
 	def __init__(self, x, y) -> None:
 		self.x = x
 		self.y = y
-		self.radius = 15
+		self.radius = 10
 		self.light = pygame.Surface((2*self.radius, 2*self.radius), pygame.SRCALPHA)
 		self.light.set_colorkey((255, 0, 255))
 		self.alpha = 0
@@ -566,11 +566,11 @@ class Firefly:
 		self.dir = [-1, -1]
 
 	def fly(self):
-		self.x += noise.noise(self.x, self.y) * 0.5 * self.dir[0] 
-		self.y += noise.noise(self.x, self.y) * 0.5 * self.dir[1]
+		self.x += noise.noise(self.x, self.y) * 0.5 * math.sin(self.alpha) * self.dir[0]
+		self.y += noise.noise(self.x, self.y) * 0.5 * math.cos(self.alpha) * self.dir[1]
 		self.time += random.random()
 		if (random.random() < 0.005):
-			self.dir = [random.randint(-1, 1), random.randint(-1, 1)]
+			self.dir = [random.choice((-1, 1)), random.choice((-1, 1))]
 	
 	def draw(self, surface):
 		u.circle(surface, (0, 255 - self.alpha * 35, 0), (self.x, self.y), 1)
@@ -579,3 +579,8 @@ class Firefly:
 		self.light.set_alpha(55 * abs(math.sin(self.alpha)))
 		self.alpha += 0.005
 		surface.blit(self.light, (self.x - self.radius, self.y - self.radius))
+
+		if self.y + self.radius > 270:
+			reflection = self.light
+			for i in range(0,int(self.y + self.radius - 270),2):
+				surface.blit(reflection,[(math.sin(i*0.5))*i*0.5+(noise.noise(pygame.time.get_ticks()*0.001,i*0.2)-0.5)*20,i],(0,50-i,640,1))
