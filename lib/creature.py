@@ -6,101 +6,6 @@ import lib.noise as noise
 import lib.utilities as u
 import lib.tree as tree
 
-class goStraight:
-    def __init__(self, x, y, v, dir = 1) -> None:
-        self.x = x
-        self.y = y
-        self.v = v
-        # self.spd = spd
-        self.time = 0
-        self.dir = dir
-    
-    def update(self, onland = 0):
-        if self.y*self.dir > onland *self.dir:
-            return 'boom'
-        self.x += self.v[0]
-        self.time += 1
-        self.y += self.v[1]
-        # self.v[0], self.v[1] = self.v[0] * self.spd, self.v[1] * self.spd
-        
-class splinter(goStraight):
-    def __init__(self, x, y, v, color, size, time) -> None:
-        super().__init__(x, y, v, -1)
-        self.color = color
-        self.size = size
-        self.onland = y + v[1]*time
-    
-    def update(self):
-        self.color += random.randint(3, 5)
-        self.size -= 0.1
-        return super().update(self.onland)
-    
-    def draw(self, surface):
-        if 0 < self.color < 255:
-            u.polygon(surface, (self.color, self.color, self.color), [[self.x, self.y], [self.x + math.ceil(self.size), self.y], [self.x + math.ceil(self.size), self.y - math.ceil(self.size)], [self.x, self.y - math.ceil(self.size)]])
-    
-class Player:
-    def __init__(self, x, y) -> None:
-        self.x = x
-        self.y = y
-        self.ay = 0
-        self.vx = 0
-        self.vy = 0
-        self.color = (140, 140, 140)
-        self.background = (245, 245, 245)
-        self.time = 0
-        self.status = 'onland'
-        self.split = None
-        self.cnt = 0
-        self.angle = -math.pi/2
-
-    def draw(self, surface):
-        if self.status == 'onland' or self.status == 'insky':
-            u.circle(surface, self.color, (self.x , self.y - 12), 12)
-            
-            vector = [math.cos(self.angle), math.sin(self.angle)]
-            mounth = [self.x - vector[0] * 6, self.y - 12 - vector[1]*6]
-            u.line(surface, self.background, mounth, [mounth[0] + vector[1] * 4, mounth[1] - vector[0] * 4], 2)
-            u.line(surface, self.background, mounth, [mounth[0] - vector[1] * 4, mounth[1] + vector[0] * 4], 2)
-
-            eye = [self.x - math.cos(self.angle - math.pi/3) * 3, self.y - 12 - math.sin(self.angle - math.pi/3) * 3]
-            u.line(surface, self.background, eye, [eye[0] + vector[0] * 6, eye[1] + vector[1] * 6], 1)
-            eye = [self.x - math.cos(self.angle + math.pi/3) * 3, self.y - 12 - math.sin(self.angle + math.pi/3) * 3]
-            u.line(surface, self.background, eye, [eye[0] + vector[0] * 6, eye[1] + vector[1] * 6], 1)
-        else:
-            for i in self.split:
-                if i == None:
-                    continue
-                i.draw(surface)
-            pygame.draw.circle(surface, (180, 180, 180), [self.x, self.y], self.time, width=2)
-    
-    def update(self, onland):
-        if self.status == 'onland':
-            self.x += self.vx
-            self.y = onland
-            return True
-        elif self.status == 'insky':
-            self.x += self.vx
-            self.time += 1
-            self.y -= self.vy - int(self.ay * (2*self.time - 1) / 2)
-            if self.y > onland:
-                self.y = onland
-                self.ay = 0
-                self.status = 'onland'
-            return True
-        else:
-            self.time += 3
-            if self.cnt > 1:
-                for i in self.split:
-                    if i == None:
-                        continue
-                    if i.update() == 'boom':
-                        i = None
-                        self.cnt -= 1
-                return True
-            else:
-                return False
-
 class Animal(object):
     def __init__(self,x,y):
         self.x = x
@@ -300,6 +205,7 @@ class Horse(Animal):
 
 	def rest(self):
 		s = self
+		s.x -= 0.3
 		s.t +=1
 		for i in range(0,len(s.skel)):
 			if i != 6 and i != 1:
@@ -493,6 +399,7 @@ class Bird(Animal):
 	def rest(self):
 		
 		s = self
+		s.x += 0.3
 		#s.t = -1 #math.pi
 		s.t2 += 1
 		s.to(5,0,20+180*2*((s.skel[5][0]>0)-0.5),10)
@@ -678,3 +585,23 @@ class Crane(Bird):
 		s.line(surf,cd[12],cd[13],0.5)
 		#s.line(surf,cd[14],cd[15])	
 
+class Firefly:
+	def __init__(self, x, y) -> None:
+		self.x = x
+		self.y = y
+		self.v = [-1, 0]
+		self.radius = 15
+		self.light = pygame.Surface((2*self.radius, 2*self.radius), pygame.SRCALPHA)
+		self.light.set_colorkey((255, 0, 255))
+		self.light.fill((255, 0, 255))
+		u.circle(self.light, (0, 255, 0), (self.radius, self.radius), self.radius)
+		self.light.set_alpha(70)
+		self.spd = 1
+
+	def fly(self):
+		self.x += self.v[0] * self.spd
+		self.y += self.v[1]
+	
+	def draw(self, surface):
+		u.circle(surface, (0, 255, 0), (self.x, self.y), 1)
+		surface.blit(self.light, (self.x - self.radius, self.y - self.radius))

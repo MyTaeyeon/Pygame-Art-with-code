@@ -21,15 +21,7 @@ screen = pygame.display.set_mode([width/2,height+50])
 screen.fill((240, 240, 240))
 pygame.display.set_caption("")
 
-transparent_surface = pygame.Surface((width//2, height+50), pygame.SRCALPHA)
-alpha = 100  # 0.2 * 255
-transparent_surface.fill((30, 30, 30))
-transparent_surface.set_alpha(alpha)
-
 COLOR_KEY = [255,0,255]
-
-pygame.mixer.music.load('courageously-166375.mp3')
-pygame.mixer.music.set_volume(0.3)
 
 # terrain =========================================================================================
 treeDensity = 32
@@ -67,7 +59,7 @@ for landni in range(len(land)):
 	land[landni]=makeLand(landni,maxheight=20+terrain[3]*120)
 
 def onlandY(ox):
-	if 0 < ox / landDensity < len(land) - 1:
+	if 0 <= ox / landDensity < len(land) - 1:
 		return height - min(land[math.ceil(ox / landDensity)], land[math.floor(ox / landDensity)])
 	else:
 		return 320
@@ -136,18 +128,18 @@ def makeBGLayer(n):
 # camera ==========================================================================================
 canvas = pygame.Surface([width/2,height])
 scroll = 0
-SPEED = 3
+SPEED = 0.3
 
 # animal ==========================================================================================
 birds = []
 deers = []
 cranes = []
-player = creature.Player(0, height - land[0])
+fireflies = [creature.Firefly(150, 150)]
 
 def makeBirds(n):
 	global birds
 	for i in range(0,n):
-		b = creature.Bird(random.randrange(width//2+30,width//2+60),0)
+		b = creature.Bird(random.randrange(width//2+30,width//2+60),150)
 		b.s = 0.5
 		b.aspd = 0.3
 		b.yo = height
@@ -156,31 +148,28 @@ def makeBirds(n):
 		birds.append(b)
 
 def birdCtrl():
-	global birds, arrows
+	global birds, arrows, pctrl
 	for b in birds:
-		if b.health > 0:
-			if ((abs(player.x - b.x) < 320 and random.random()<0.05) or random.random()<0.0002) and b.on == 0:
-				b.on = 1
-				ra = math.pi/20.0+random.random()*math.pi/6.0*2.1
-				rl = random.choice([3,4,5])
-				b.v=[rl*math.cos(ra),-rl*math.sin(ra)]
-			if b.on == 1:
-				b.simpFly()
+		if random.random()<0.05 or random.random()<0.0002 and b.on == 0:
+			b.on = 1
+			ra = math.pi/20.0+random.random()*math.pi/6.0*2.1
+			rl = random.choice([3,4,5])
+			b.v=[rl*math.cos(ra)/4,-rl*math.sin(ra)/4]
+		if b.on == 1:
+			b.simpFly()
 
-				if abs(player.x - b.x) > 160 and random.random()<1:
-					b.v[1] = min(b.v[1]+0.05,0.4)
-				if b.y >= 2:
-					b.on = 0
+			if abs(320 - b.x) > 160:
+				b.v[1] = min((b.v[1]+0.05) /4,0.1)
+			if b.y >= 2:
+				b.on = 0
 
-			else:
-				b.rest()
-				if 0 < b.x < width/2:
-					b.yo=onlandY(b.x) - 3
-
-			if b.x<0 or b.x>width or b.yo<0:
-				birds.remove(b)
 		else:
-			b.fall()
+			b.rest()
+			if 0 < b.x < width/2:
+				b.yo=height-3-onlandY(b.x)
+
+		if b.x<0 or b.x>width or b.yo<0:
+			birds.remove(b)
 
 def makeDeers(n):
 	global deers
@@ -189,7 +178,7 @@ def makeDeers(n):
 		deer = creature.Deer(width/2+landDensity+50+r*10,0,color = (160+r,160+r,160+r))
 		deer.yo = height
 		deer.s = 1.1
-		deer.aspd = 0.15
+		deer.aspd = 0.05
 		deers.append(deer)
 
 def makeCranes(n):
@@ -213,7 +202,7 @@ def deersCtrl():
 			d.walk()
 		else:
 			d.rest()
-		if d.x<-100:
+		if d.x<-150:
 			deers.remove(d)
 
 def craneCtrl():
@@ -224,33 +213,33 @@ def craneCtrl():
 		if c.x<-100:
 			cranes.remove(c)
 
+def makeFireflies(n):
+	global fireflies
+	for _ in range(n):
+		fireflies.append(creature.Firefly(random.randrange(width//2+30,width//2+60), random.randint(0, 300)))
+
+def fireflyCtrl():
+	for a in fireflies:
+		a.fly()
+		if a.x < -100:
+			fireflies.remove(a)
+
 # setup for first run =============================================================================
-scroll = None
-birds = None
-deers = None
-player = None
-T = None
-r = None
-gifts = None
-shape = None
-cnt = None
-phase = None
-zoff = None
-running = None
-score = None
+scroll = 0
+birds = []
+deers = []
+cranes = []
+T = 0
 
 # Game is running =================================================================================
 
 def play():
-	global running, scroll, score, T, gifts, birds, deers, screen, cnt, Lrs, locrs, Ls, locs, SPEED, canvas, terrain, landloc, landni, landDensity
-	pygame.mixer.music.play(-1)
-	while running:
+	global scroll, T, birds, deers, screen, Lrs, locrs, Ls, locs, SPEED, canvas, terrain, landloc, landni, landDensity
+	while True:
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				sys.exit()
-				
-		clock.tick(45)
-	
+					
 		screen.fill((255, 255, 255))
 		canvas.fill([240,240,240])
 		
@@ -280,105 +269,24 @@ def play():
 		for c in cranes:
 			c.draw(canvas)
 
-		for j in range(len(gifts)):
-			if cnt[j] == 0:
-				if gifts[j].update(onlandY(gifts[j].x)) =='boom':
-					cnt[j] = 21
-					gifts[j] = [creature.splinter(gifts[j].x + random.randint(-6, 6), gifts[j].y + random.randint(0, 6), 
-									[random.randint(-6, 6), random.randint(-3, -1)], 
-									150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
-				else:
-					if u.dist(gifts[j].x, gifts[j].y, player.x, player.y - 12) < 29 and player.status[0] != 'Death':
-						if player.y - 12 >= gifts[j].y:
-							player.status = 'Death'
-							player.split = [creature.splinter(player.x + random.randint(-6, 6), player.y + random.randint(0, 6), 
-										[random.randint(-6, 6), random.randint(-3, -1)], 
-										150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
-							player.cnt = 21
-						else:
-							player.status = 'insky'
-							player.time = 0
-							player.vy = SPEED * 4
-							player.ay = SPEED / 3
-						cnt[j] = 21
-						gifts[j] = [creature.splinter(gifts[j].x + random.randint(-6, 6), gifts[j].y + random.randint(0, 6), 
-									[random.randint(-6, 6), random.randint(-3, -1)], 
-									150, random.randint(3, 5), random.randint(15, 20)) for i in range(20)]
-					else:	
-						# draw gift!!!				
-						center_x, center_y = gifts[j].x, gifts[j].y
-						points = []
-
-						for a in range(0, int(2 * math.pi / 0.01)):
-							a = a * 0.01 
-							r = random.randint(1, 17)
-							x = r * math.cos(a) + center_x
-							y = r * math.sin(a) + center_y
-							points.append((x, y))
-
-						pygame.draw.lines(canvas, (100, 100, 100), False, points, 1)
-
-			elif cnt[j] > 1:
-				for i in range(len(gifts[j])):
-					if gifts[j][i] == None:	
-						continue
-					if gifts[j][i].update() == 'boom':
-						gifts[j][i] = None
-						cnt[j] -= 1
-					else:
-						gifts[j][i].draw(canvas)
-			else:
-				cnt[j] = 0
-				gifts[j] = creature.goStraight(random.randint(100, width // 2 - 50), random.randint(-30, -10), [random.randint(-6, 6), random.randint(3, 6)])
-
-		running = player.update(onlandY(player.x))
-		player.vx = 0
-		player.draw(canvas)
-
 		u.polygon(canvas,(130,130,130),[[0,height]]+[[landloc+i*landDensity,height-land[i]] for i in range(0,len(land))]+[[width/2,height]]) 
 
-		usercontrol = pygame.key.get_pressed()
-
-		if usercontrol[pygame.K_RIGHT]:
-			if player.x >= 10 * landDensity:
-				player.x = 10 * landDensity
-				landloc -= SPEED
-				scroll -= SPEED
-				score += 1
-			else:
-				player.vx = SPEED
-			player.angle += 0.05
-		if usercontrol[pygame.K_LEFT]:
-			player.vx = -SPEED
-			if player.x < 10:
-				player.x = 10
-			player.angle -= 0.05
-		if usercontrol[pygame.K_SPACE] and player.status == 'onland':
-			player.status = 'insky'
-			player.time = 0
-			player.vy = SPEED * 4.5
-			player.ay = SPEED / 3
+		landloc -= SPEED
+		scroll -= SPEED
 
 		if landloc < -landDensity:
 			landni += 1
 			land.append(makeLand(landni,maxheight=land[-1] + 20))
 			landloc += landDensity
 			land.pop(0)
-		
-
-		if random.random()<0.0005:
-			makeBirds(random.randrange(6,12))
-		if random.random() < 0.0005 and terrain[3] == 0:
-			makeDeers(1)
-		if random.random() < 0.0005 and terrain[3] == 0:
-			makeCranes(5)
 
 		birdCtrl()
 		deersCtrl()
 		craneCtrl()
-		u.text(canvas,570,10,"SCORE: %d" % score, (100, 100, 100))
+		fireflyCtrl()
+
 		screen.blit(canvas,[0,0])
-		
+
 		# reflect
 		reflection = canvas#pygame.transform.flip(canvas,False,True)
 		pygame.draw.rect(screen,(180,180,180),[0,height,width/2,50])
@@ -390,69 +298,42 @@ def play():
 		filter.filter(array,T)
 		del(array) 
 
-		pygame.display.update()	
-	
-	screen.blit(transparent_surface, (0, 0))
-	font = pygame.font.Font(None, 40) 
-	text = font.render("Score: " + str(score), True, (255, 255, 255))
-	screen.blit(text, (250, 150))
-	font = pygame.font.Font(None, 20) 
-	text = font.render("press r to restart", True, (255, 255, 255))
-	screen.blit(text, (250, 180))
-	pygame.mixer.music.stop()
+		color = screen.get_at((0, 0))
 
-# restart or exit =================================================================================
+		if color.r > 130:
+			if random.random()<0.0002:
+				makeBirds(random.randrange(6,10))
+			if random.random() < 0.0002 and terrain[3] == 0:
+				makeDeers(1)
+			if random.random() < 0.0002 and terrain[3] == 0:
+				makeCranes(5)
+		else:
+			if len(fireflies) == 0:
+				makeFireflies(5)
 
-def restart():
-	while True:
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
-				pygame.quit()
-				sys.exit()
-			if event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_r:
-					return None
+		for f in fireflies:
+			f.draw(screen)
 
 		pygame.display.update()	
 
-# game loop =======================================================================================
-while True:
-	scroll = 0
-	birds = []
-	deers = []
-	player = creature.Player(320, 250)
-	player.status = 'insky'
-	player.time = 5
-	player.vy = SPEED * 4.5
-	player.ay = SPEED / 3
-	T = 0
-	r = 0
-	gifts = [creature.goStraight(random.randint(-100, width ), random.randint(-30, -10), [random.randint(-6, 6), random.randint(3, 6)]) for i in range(7)]
-	shape = [None] * len(gifts)
-	cnt = [0] * len(gifts)
-	phase = 0
-	zoff = 0
-	running = True
-	score = 0
+thread2 = threading.Thread(target=mt, args=(1,  3, 2, 1, 0))
+thread2.start()
+thread1 = threading.Thread(target=mt, args=(2,  3, 2, 1, 0))
+thread1.start()
 
-	thread2 = threading.Thread(target=mt, args=(1,  3, 2, 1, 0))
-	thread2.start()
-	thread1 = threading.Thread(target=mt, args=(2,  3, 2, 1, 0))
-	thread1.start()
+vine = pattern.Vine(0,160)
+screen.fill([240,240,240])
+for _ in range(10000):
+	vine.grow(screen)
+	pygame.draw.rect(screen,(240,240,240),[0,170,100,20])
+	u.text(screen,10,height/2+15,"Loading... "+str(int(loaded / allloads / 2 * 100)) + " %",(180,180,180))
+	# u.text(screen,10,height/2+15,"Loading... ",(180,180,180))
+	u.line(screen,(180,180,180),[0,height/2],[(float(loaded)/allloads)*width/2,height/2],1)
+	pygame.display.flip()
+thread2.join()
+thread1.join()
 
-	vine = pattern.Vine(0,160)
-	screen.fill([240,240,240])
-	for _ in range(10000):
-		vine.grow(screen)
-		pygame.draw.rect(screen,(240,240,240),[0,170,100,20])
-		u.text(screen,10,height/2+15,"Loading... "+str(int(loaded / allloads / 2 * 100)) + " %",(180,180,180))
-		# u.text(screen,10,height/2+15,"Loading... ",(180,180,180))
-		u.line(screen,(180,180,180),[0,height/2],[(float(loaded)/allloads)*width/2,height/2],1)
-		pygame.display.flip()
-	thread2.join()
-	thread1.join()
+while loaded<allloads:
+	pass
 
-	while loaded<allloads:
-		pass
-	play()
-	restart()
+play()
