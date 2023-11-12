@@ -5,15 +5,8 @@
     pygame == 2.5.1
     numpy == 1.25.2
 
-## HOW TO RUN IN WINDOW
-Download the project. In terminal, type:
-```bash
-py \path\to\folder\main.py
-```
-Or:
-```bash
-python \path\to\folder\main.py
-```
+## HOW TO RUN
+run main.py
 
 ## CONTRIBUTE TO THIS PROJECT
 ✅ Tree <br>
