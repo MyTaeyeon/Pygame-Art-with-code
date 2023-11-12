@@ -72,8 +72,6 @@ class Animal(object):
             if ti[0] == 0:
                 ti[1](*ti[2])
                 self.timers.remove(ti)
-        
-        
                 
     def addanim(self,skn,rol,dest,t):
         na = [[skn,rol],[dest,t]]
@@ -96,7 +94,6 @@ class Animal(object):
     def line(self,surf,start_pos,end_pos,width=1):
         u.line(surf,self.color,[self.x+start_pos[0]*self.s*self.dir,self.y+self.yo+start_pos[1]*self.s],
                                 [self.x+  end_pos[0]*self.s*self.dir,self.y+self.yo+  end_pos[1]*self.s],width*self.s)
-        
 
     def drawSkel(self,surf):
         for i in range(0,len(self.skel)):
@@ -169,8 +166,7 @@ class Horse(Animal):
 						[(cd[12][0]+cd[17][0])/2+2,(cd[12][1]+cd[17][1])/2]
 						)
 						
-		self.poly(surf, [cd[4][0],cd[4][1]],cd[5],cd[6])
-						
+		self.poly(surf, [cd[4][0],cd[4][1]],cd[5],cd[6])					
 
 
 	def walk(self):
@@ -215,8 +211,6 @@ class Horse(Animal):
 		noi = max(min((noise.noise(s.t*s.aspd*0.05)-0.4)*40,1),-1)
 		s.to(1,0,-5+noi*50,5)
 		s.to(0,0,-40-noi*40,5)
-		
-		#s.to(1,1,25+math.cos(s.t*s.aspd*0.5+math.pi)*2)
 
 class Deer(Horse):
 	def __init__(self,x,y,color=(140,140,140),s=1.1):
@@ -236,19 +230,19 @@ class Deer(Horse):
 		self.tx = 0
 		
 		tree.drawTree(surf = self.horn,
-				 x = 50*self.s,#cd[1][0]*self.s+self.x,
-				 y = 50*self.s,#cd[1][1]*self.s+self.y+self.yo,
+				 x = 50*self.s,
+				 y = 50*self.s,
 				 angle = math.pi*2/3,
-				 dangle = lambda dep: 0,#-(random.random()-0.5)*math.pi/3,
+				 dangle = lambda dep: 0,
 				 
 				 trunk = 0,
-				 dtrunk = lambda dep: 0,#0.8*random.random(),				 				 
+				 dtrunk = lambda dep: 0,
 				 
 				 width = 3*self.s*0.6,
 				 dwidth = lambda dep: random.random()*0.1+0.9,
 				 
 				 height = 4*self.s*0.6,
-				 dheight = lambda dep: 1.2*((dep*2)%2)+0.4,#(((dep+1)*2)%2),
+				 dheight = lambda dep: 1.2*((dep*2)%2)+0.4,
 				 
 				 opening = math.pi/6,
 				 dopening = lambda dep: 0.5+random.random()*0.5,
@@ -259,38 +253,24 @@ class Deer(Horse):
 				)	
 		if self.dir == -1:
 			self.horn = pygame.transform.flip(self.horn,1,0)
-		#pygame.draw.rect(self.horn,(255,0,0),[0,0,self.horn.get_width()/2,self.horn.get_height()],5)
 		self.shorn = self.horn	
-		#self.horn.get_rect().center=(50*self.s,50*self.s)
-		#self.horn = pygame.transform.rotate(self.horn, 90)	
-		#self.horn.get_rect().center=(50*self.s,50*self.s)
-		#print self.horn.get_rect().center
-		#self.horn = pygame.transform.scale(self.horn, (50*self.s,35*self.s))
+
 	def draw(self,surf):
 		super(Deer,self).draw(surf)
 		cd = []
 		for i in range(len(self.skel)):
 			cd.append(self.calcCoord(i)[:2])
-		#print self.horn.get_width()
 		self.horn = self.shorn
-		#self.tx = (self.tx+0.5)%90.0
-		#a = self.tx
 		a = self.dir*(self.calcCoord(0)[2]+30)
 
 		self.horn = pygame.transform.rotate(self.horn, a)	
-		#cd[1] = [-80,-80]
 		if self.dir == 1:
 			hc = [cd[1][0]*self.s+self.x     - 50*self.s*math.cos(math.radians(90+a))-70*self.s*math.cos(math.radians(45-a)),
 								 cd[1][1]*self.s+self.y+self.yo        - 68*self.s*math.sin(math.radians(45-a))]
 		else:
-			#hc = [-cd[1][0]*self.s+self.x   - 50*self.s*math.sin(math.radians(a)),
-			#					 cd[1][1]*self.s+self.y+self.yo    - 50*self.s*math.sin(math.radians(a)) - 50*self.s*math.cos(math.radians(a))]			
 			hc = [-cd[1][0]*self.s+self.x   - 50*self.s*math.cos(math.radians(a))-49*self.s*math.sin(math.radians(a)),
 								 cd[1][1]*self.s+self.y+self.yo  - 50*self.s*math.sin(math.radians(a)) - 49*self.s*math.cos(math.radians(a))]
 
-
-		#pygame.draw.rect(surf,(0,255,0),[hc[0],hc[1],self.horn.get_width()/2,self.horn.get_height()],1)
-		
 		surf.blit(self.horn,[hc[0],hc[1]])
 		
 class Bird(Animal):
@@ -400,7 +380,6 @@ class Bird(Animal):
 		
 		s = self
 		s.x += 0.3
-		#s.t = -1 #math.pi
 		s.t2 += 1
 		s.to(5,0,20+180*2*((s.skel[5][0]>0)-0.5),10)
 		s.to(6,0,-20+180*2*((s.skel[6][0]>0)-0.5),10)
@@ -457,10 +436,6 @@ class Bird(Animal):
 					[cd[8][0]-5,cd[8][1]])
 		s.poly(surf,cd[9],[cd[9][0]-8,cd[9][1]],cd[10])
 		s.poly(surf,cd[2],cd[8],cd[9])
-
-
-		
-		
 			
 		s.poly(surf,cd[2],[(cd[2][0]+cd[3][0])/2,(cd[2][1]+cd[3][1])/2-2],cd[3],cd[11],[cd[11][0]+5,cd[11][1]])
 		s.poly(surf,[(cd[3][0]+cd[4][0])/2,(cd[3][1]+cd[4][1])/2],cd[3],cd[11])
@@ -486,7 +461,6 @@ class Bird(Animal):
 					[cd[6][0]-8,cd[6][1]],
 					[cd[5][0]-5,cd[5][1]])
 		s.poly(surf,cd[6],[cd[6][0]-8,cd[6][1]],cd[7])
-		#s.poly(surf,cd[2],cd[5],cd[6])	
 			
 		s.poly(surf,cd[4],cd[11],cd[0],cd[1],cd[2],cd[3])
 	
@@ -542,8 +516,7 @@ class Crane(Bird):
 		s.to(13,0,10+math.sin(s.t*s.aspd)*5 + 10*noise.noise(s.t*s.aspd*0.01,1)-5)
 		s.to(15,0,10+math.sin(s.t*s.aspd)*5 + 10*noise.noise(s.t*s.aspd*0.01,2)-5)
 
-		#s.x += s.v[0]*s.dir
-		s.y += 0.2*self.s*math.sin(s.t*s.aspd+math.pi)#30.5*s.v[1]+0.5*s.v[1]*(0.5*(math.sin(s.t*s.aspd)+1))
+		s.y += 0.2*self.s*math.sin(s.t*s.aspd+math.pi)
 		
 	def draw(self,surf):
 		cd = []
@@ -572,36 +545,37 @@ class Crane(Bird):
 		s.poly(surf,[(cd[3][0]+cd[4][0])/2,(cd[3][1]+cd[4][1])/2],cd[3],cd[11])
 		s.poly(surf,cd[1],cd[2],[cd[2][0],cd[2][1]+2])
 		s.poly(surf,cd[0],cd[1],[(cd[0][0]+cd[1][0])/2,(cd[0][1]+cd[1][1])/2-2])
-		#s.line(surf,cd[2],cd[1],1)
-		#s.poly(surf,cd[0],cd[1],cd[2])
-		#s.poly(surf,cd[11],[(cd[0][0]+cd[1][0])/2,(cd[0][1]+cd[1][1])/2],cd[1],cd[2])
 			
 		s.line(surf,cd[11],cd[12],1)
 		s.line(surf,cd[11],cd[14],1)
 		
 		s.poly(surf,cd[3],cd[4],cd[11])
-		#s.line(surf,cd[3],cd[4],2)
 		
 		s.line(surf,cd[12],cd[13],0.5)
-		#s.line(surf,cd[14],cd[15])	
 
 class Firefly:
 	def __init__(self, x, y) -> None:
 		self.x = x
 		self.y = y
-		self.v = [-1, 0]
 		self.radius = 15
 		self.light = pygame.Surface((2*self.radius, 2*self.radius), pygame.SRCALPHA)
 		self.light.set_colorkey((255, 0, 255))
-		self.light.fill((255, 0, 255))
-		u.circle(self.light, (0, 255, 0), (self.radius, self.radius), self.radius)
-		self.light.set_alpha(70)
-		self.spd = 1
+		self.alpha = 0
+		self.spd = 0.5
+		self.time = 0
+		self.dir = [-1, -1]
 
 	def fly(self):
-		self.x += self.v[0] * self.spd
-		self.y += self.v[1]
+		self.x += noise.noise(self.x, self.y) * 0.5 * self.dir[0] 
+		self.y += noise.noise(self.x, self.y) * 0.5 * self.dir[1]
+		self.time += random.random()
+		if (random.random() < 0.005):
+			self.dir = [random.randint(-1, 1), random.randint(-1, 1)]
 	
 	def draw(self, surface):
-		u.circle(surface, (0, 255, 0), (self.x, self.y), 1)
+		u.circle(surface, (0, 255 - self.alpha * 35, 0), (self.x, self.y), 1)
+		self.light.fill((255, 0, 255))
+		u.circle(self.light, (0, 255, 0), (self.radius, self.radius), self.radius)
+		self.light.set_alpha(55 * abs(math.sin(self.alpha)))
+		self.alpha += 0.005
 		surface.blit(self.light, (self.x - self.radius, self.y - self.radius))

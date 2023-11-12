@@ -17,7 +17,6 @@ clock = pygame.time.Clock()
 size = width, height = 1280, 320
 buff = 200
 screen = pygame.display.set_mode([width/2,height+50])
-# screen = pygame.display.set_mode([width/2,height+50], pygame.FULLSCREEN)
 screen.fill((240, 240, 240))
 pygame.display.set_caption("")
 
@@ -122,19 +121,19 @@ def makeBGLayer(n):
 	if totalMade[n]%int(lspds[n]*10) == 0:
 		terrain[n] = (terrain[n]+1) % 2
 
-	# print(str(loaded)+"/"+str(allloads))
 	return l
 
 # camera ==========================================================================================
 canvas = pygame.Surface([width/2,height])
 scroll = 0
 SPEED = 0.3
+T = 0
 
 # animal ==========================================================================================
 birds = []
 deers = []
 cranes = []
-fireflies = [creature.Firefly(150, 150)]
+fireflies = []
 
 def makeBirds(n):
 	global birds
@@ -216,20 +215,16 @@ def craneCtrl():
 def makeFireflies(n):
 	global fireflies
 	for _ in range(n):
-		fireflies.append(creature.Firefly(random.randrange(width//2+30,width//2+60), random.randint(0, 300)))
+		fireflies.append(creature.Firefly(random.randrange(30,width//2+30), random.randint(0, 300)))
 
 def fireflyCtrl():
 	for a in fireflies:
 		a.fly()
-		if a.x < -100:
+		a.x -= SPEED
+		if a.y > height:
+			a.dir[1] *= -1
+		if a.time > 350 or a.x < -50:
 			fireflies.remove(a)
-
-# setup for first run =============================================================================
-scroll = 0
-birds = []
-deers = []
-cranes = []
-T = 0
 
 # Game is running =================================================================================
 
@@ -288,7 +283,7 @@ def play():
 		screen.blit(canvas,[0,0])
 
 		# reflect
-		reflection = canvas#pygame.transform.flip(canvas,False,True)
+		reflection = canvas
 		pygame.draw.rect(screen,(180,180,180),[0,height,width/2,50])
 		for i in range(0,2*(screen.get_height()-height),2):
 			screen.blit(reflection,[(math.sin(i*0.5))*i*0.5+(noise.noise(pygame.time.get_ticks()*0.001,i*0.2)-0.5)*20,height+i-1],(0,height-i,width/2,1))
@@ -297,6 +292,9 @@ def play():
 		array = [pygame.surfarray.pixels_red(screen),pygame.surfarray.pixels_green(screen),pygame.surfarray.pixels_blue(screen)]
 		filter.filter(array,T)
 		del(array) 
+
+		for f in fireflies:
+			f.draw(screen)
 
 		color = screen.get_at((0, 0))
 
@@ -307,12 +305,9 @@ def play():
 				makeDeers(1)
 			if random.random() < 0.0002 and terrain[3] == 0:
 				makeCranes(5)
-		else:
-			if len(fireflies) == 0:
-				makeFireflies(5)
-
-		for f in fireflies:
-			f.draw(screen)
+		elif color.r <= 120:
+			if random.random() < 0.03:
+				makeFireflies(1)
 
 		pygame.display.update()	
 
@@ -326,8 +321,7 @@ screen.fill([240,240,240])
 for _ in range(10000):
 	vine.grow(screen)
 	pygame.draw.rect(screen,(240,240,240),[0,170,100,20])
-	u.text(screen,10,height/2+15,"Loading... "+str(int(loaded / allloads / 2 * 100)) + " %",(180,180,180))
-	# u.text(screen,10,height/2+15,"Loading... ",(180,180,180))
+	u.text(screen,10,height/2+15,f"Loading... {'{:.1f}'.format(loaded / allloads / 2 * 100)}%",(180,180,180))
 	u.line(screen,(180,180,180),[0,height/2],[(float(loaded)/allloads)*width/2,height/2],1)
 	pygame.display.flip()
 thread2.join()

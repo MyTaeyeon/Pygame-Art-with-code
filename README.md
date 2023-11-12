@@ -15,41 +15,22 @@ Or:
 python \path\to\folder\main.py
 ```
 
-## VIDEO
-Processing...
+## IMAGE
+In demo file
 
 ## CONTRIBUTE TO THIS PROJECT
-* Sign and meaning:
-
-<img src="https://i.imgur.com/IrB9DEV.jpg" alt="Imugr" width="300"><br>
-* &nbsp;<br>
-✅ Background <br>
-✅ Enemy <br>
-✅ Animals <br>
-⚠️ Animals movement <br>
-✅ Day and night loop <br>
-✅ Infinity land <br>
-☑️ Loading screen <br>
-✅ Death animation <br>
-☑️ Icon <br>
-⚠️ Player shape <br>
+✅ Tree <br>
+✅ Mountain <br>
+✅ Land <br>
+✅ Crane <br>
+✅ Bird <br>
+✅ Firefly <br>
+✅ Loading screen <br>
+✅ Icon <br>
 
 ## FEATURES
 * EVERYTHING Procedurally generated
 * Day-night transition
 * Extremely detailed animations
-* Relaxing music
-
-## CONTROLS
-* Right arrow `->`: go right
-* Left arrow `<-`: go left
-* Space `[___]`: jump
-* Key `r` : restart
-* You cannot go left out of screen
-* Avoid collisions with blocks
-* Try to go as far as possible.
-
-## WANNA OTHER MUSIC
-* Prepare your own music and paste the path in `main.py` line 31
 
 Enjoy!
