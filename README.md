@@ -15,9 +15,6 @@ Or:
 python \path\to\folder\main.py
 ```
 
-## IMAGE
-In demo file
-
 ## CONTRIBUTE TO THIS PROJECT
 ✅ Tree <br>
 ✅ Mountain <br>
