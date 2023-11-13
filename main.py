@@ -298,7 +298,7 @@ def play():
 
 			if f.y + f.radius > height - 50:
 				for p in range(max(0, int(f.y - f.radius - height + 50)), int(f.y + f.radius - height + 50 + 1), 3):
-					u.line(screen, (118, 171, 144), (f.x - f.radius - (math.sin(p*0.5))*p*0.5 + noise.noise(pygame.time.get_ticks()*0.001, p*0.2) + 3, height + p), (f.x + f.radius + (math.sin(p*0.5))*p*0.5 - noise.noise(pygame.time.get_ticks()*0.001, p*0.2) - 3, height + p))
+					u.line(screen, (118, 171, 144), (f.x - f.radius - (math.sin(p*0.5))*p*0.5 + noise.noise(pygame.time.get_ticks()*0.001, p*0.2) + 3, height + 50 - p), (f.x + f.radius + (math.sin(p*0.5))*p*0.5 - noise.noise(pygame.time.get_ticks()*0.001, p*0.2) - 3, height + 50 - p))
 
 		color = screen.get_at((0, 0))
 

@@ -557,7 +557,7 @@ class Firefly:
 	def __init__(self, x, y) -> None:
 		self.x = x
 		self.y = y
-		self.radius = 10
+		self.radius = random.randint(7, 12)
 		self.light = pygame.Surface((2*self.radius, 2*self.radius), pygame.SRCALPHA)
 		self.light.set_colorkey((255, 0, 255))
 		self.alpha = 0
