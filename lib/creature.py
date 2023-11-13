@@ -573,14 +573,9 @@ class Firefly:
 			self.dir = [random.choice((-1, 1)), random.choice((-1, 1))]
 	
 	def draw(self, surface):
-		u.circle(surface, (0, 255 - self.alpha * 35, 0), (self.x, self.y), 1)
+		u.circle(surface, (0, 255 - self.alpha * 30, 0), (self.x, self.y), 1)
 		self.light.fill((255, 0, 255))
 		u.circle(self.light, (0, 255, 0), (self.radius, self.radius), self.radius)
 		self.light.set_alpha(55 * abs(math.sin(self.alpha)))
 		self.alpha += 0.005
 		surface.blit(self.light, (self.x - self.radius, self.y - self.radius))
-
-		if self.y + self.radius > 270:
-			reflection = self.light
-			for i in range(0,int(self.y + self.radius - 270),2):
-				surface.blit(reflection,[(math.sin(i*0.5))*i*0.5+(noise.noise(pygame.time.get_ticks()*0.001,i*0.2)-0.5)*20,i],(0,50-i,640,1))

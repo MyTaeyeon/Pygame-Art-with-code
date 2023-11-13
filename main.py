@@ -215,7 +215,7 @@ def craneCtrl():
 def makeFireflies(n):
 	global fireflies
 	for _ in range(n):
-		fireflies.append(creature.Firefly(random.randrange(30,width//2+30), random.randint(0, 300)))
+		fireflies.append(creature.Firefly(random.randrange(30,width//2+30), random.randint(30, 270)))
 
 def fireflyCtrl():
 	for a in fireflies:
@@ -296,14 +296,18 @@ def play():
 		for f in fireflies:
 			f.draw(screen)
 
+			if f.y + f.radius > height - 50:
+				for p in range(max(0, int(f.y - f.radius - height + 50)), int(f.y + f.radius - height + 50 + 1), 3):
+					u.line(screen, (118, 171, 144), (f.x - f.radius - (math.sin(p*0.5))*p*0.5 + noise.noise(pygame.time.get_ticks()*0.001, p*0.2) + 3, height + p), (f.x + f.radius + (math.sin(p*0.5))*p*0.5 - noise.noise(pygame.time.get_ticks()*0.001, p*0.2) - 3, height + p))
+
 		color = screen.get_at((0, 0))
 
-		if color.r > 130:
+		if color.r > 140:
 			if random.random()<0.0002:
 				makeBirds(random.randrange(6,10))
 			if random.random() < 0.0002 and terrain[3] == 0:
 				makeDeers(1)
-			if random.random() < 0.0002 and terrain[3] == 0:
+			if random.random() < 0.0002 and terrain[3] == 1:
 				makeCranes(5)
 		elif color.r <= 120:
 			if random.random() < 0.03:

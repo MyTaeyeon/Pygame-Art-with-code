@@ -23,4 +23,4 @@ run main.py
 * Day-night transition
 * Extremely detailed animations
 
-Enjoy!
+Draw your own world!s
