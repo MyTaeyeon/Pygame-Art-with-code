@@ -9,6 +9,7 @@ import threading
 import sys 
 import lib.daynnightloop as filter
 import lib.pattern as pattern
+import lib.font as font
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -327,6 +328,9 @@ for _ in range(10000):
 	pygame.draw.rect(screen,(240,240,240),[0,170,100,20])
 	u.text(screen,10,height/2+15,f"Loading... {'{:.1f}'.format(loaded / allloads / 2 * 100)}%",(180,180,180))
 	u.line(screen,(180,180,180),[0,height/2],[(float(loaded)/allloads)*width/2,height/2],1)
+
+	pen = font.GFont(20, 2)
+	pen.drawStr(screen,"by MyTaeyeon",350,280, size=0.5)
 	pygame.display.flip()
 thread2.join()
 thread1.join()
