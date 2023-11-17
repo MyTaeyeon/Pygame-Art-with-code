@@ -7,3 +7,8 @@
 
 ## HOW TO RUN
 run main.py
+
+## RESULTS
+![loading](./demo/demo1.png)
+![day](./demo/demo2.png)
+![night](./demo/demo3.png)
