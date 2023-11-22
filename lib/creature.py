@@ -15,7 +15,7 @@ class Animal(object):
         self.t = 0
         self.aspd = 0.05
         self.skel = []
-        self.color = (150,150,150)
+        self.color = (150, 150, 150)
         self.animations = [[]]
         self.dir = 1
         self.spd = 0.5
@@ -26,39 +26,38 @@ class Animal(object):
         return self.skel
         
     def super(self):
-        return super(type(self),self)
+        return super(type(self), self)
         
     def calcCoord(self,n):
         if n == self.skel[n][2]:
-            return [0,0,0]
+            return [0, 0, 0]
         else:
             trl = self.skel[n]
             pc = self.calcCoord(trl[2])
-            tc = [0,0,0]
+            tc = [0, 0, 0]
             
-            tc[0] = pc[0] + trl[1]*math.cos(math.radians(trl[0]+pc[2]))
-            tc[1] = pc[1] - trl[1]*math.sin(math.radians(trl[0]+pc[2]))
+            tc[0] = pc[0] + trl[1] * math.cos(math.radians(trl[0] + pc[2]))
+            tc[1] = pc[1] - trl[1]* math.sin(math.radians(trl[0] + pc[2]))
             tc[2] = pc[2] + trl[0]
             return tc
     def to(self,r,l,n,spd=3):
-        self.skel[r][l] += (n-self.skel[r][l])/float(spd)
+        self.skel[r][l] += (n-self.skel[r][l]) / float(spd)
         
     def animate(self):
         for a in self.animations[0]:
             if a[0][0] == "trans":
                 if a[0][1] == "x":
-                    self.x+=(a[1][0]-self.x)/float(a[1][1])
-                    #self.dir = (a[1][0]-self.x>0)*2-1
+                    self.x += (a[1][0] - self.x) / float(a[1][1])
                     self.walk()
+			
                 if a[0][1] == "xt":
-                    self.x+=(a[1][0]-self.x)/float(a[1][1])
-
+                    self.x += (a[1][0] - self.x) / float(a[1][1])
                 elif a[0][1] == "y":
-                    self.y+=(a[1][0]-self.y)/float(a[1][1])
+                    self.y += (a[1][0] - self.y) / float(a[1][1])
             else:
-                self.skel[a[0][0]][a[0][1]]+=(a[1][0]-self.skel[a[0][0]][a[0][1]])/float(a[1][1])
-            a[1][1]-=1
-            if a[1][1]<=0:
+                self.skel[a[0][0]][a[0][1]] += (a[1][0] - self.skel[a[0][0]][a[0][1]]) / float(a[1][1])
+            a[1][1] -= 1
+            if a[1][1] <= 0:
                 a.remove(a[1])
             if len(a) <= 1:
                 self.animations[0].remove(a)
@@ -76,7 +75,7 @@ class Animal(object):
     def addanim(self,skn,rol,dest,t):
         na = [[skn,rol],[dest,t]]
         for a in self.animations[-1]:
-            if a[0][0]==na[0][0] and a[0][1]==na[0][1]:
+            if a[0][0] == na[0][0] and a[0][1] == na[0][1]:
                 a.append(na[1])
                 return
         self.animations[-1].append(na)
@@ -99,7 +98,7 @@ class Animal(object):
         for i in range(0,len(self.skel)):
             c = self.calcCoord(i)
             pc = self.calcCoord(self.skel[i][2])
-            self.line(surf,[c[0],c[1]],[pc[0],pc[1]],1)
+            self.line(surf, [c[0], c[1]], [pc[0], pc[1]], 1)
 				
 class Horse(Animal):
 	def __init__(self,x,y):
@@ -566,16 +565,16 @@ class Firefly:
 		self.dir = [-1, -1]
 
 	def fly(self):
-		self.x += noise.noise(self.x, self.y) * 0.5 * math.sin(self.alpha) * self.dir[0]
-		self.y += noise.noise(self.x, self.y) * 0.5 * math.cos(self.alpha) * self.dir[1]
+		self.x += noise.noise(self.x, self.y)*0.5* math.sin(self.alpha)*self.dir[0]
+		self.y += noise.noise(self.x, self.y)*0.5*math.cos(self.alpha)*self.dir[1]
 		self.time += random.random()
 		if (random.random() < 0.005):
 			self.dir = [random.choice((-1, 1)), random.choice((-1, 1))]
 	
 	def draw(self, surface):
-		u.circle(surface, (0, 255 - self.alpha * 30, 0), (self.x, self.y), 1)
+		u.circle(surface, (0, 255 - self.alpha*30, 0), (self.x, self.y), 1)
 		self.light.fill((255, 0, 255))
 		u.circle(self.light, (0, 255, 0), (self.radius, self.radius), self.radius)
-		self.light.set_alpha(55 * abs(math.sin(self.alpha)))
+		self.light.set_alpha(55*abs(math.sin(self.alpha)))
 		self.alpha += 0.005
-		surface.blit(self.light, (self.x - self.radius, self.y - self.radius))
+		surface.blit(self.light, (self.x-self.radius, self.y-self.radius))
