@@ -1,7 +1,6 @@
 '''
 Perlin Noise
 Based on Javascript from p5.js (https://github.com/processing/p5.js/blob/master/src/math/noise.js)
-Ported to Python by Lingdong Huang
 '''
 
 import math
