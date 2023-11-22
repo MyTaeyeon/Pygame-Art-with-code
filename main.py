@@ -148,28 +148,32 @@ def makeBirds(n):
 		birds.append(b)
 
 def birdCtrl():
-	global birds, arrows, pctrl
+	global birds, SPEED
 	for b in birds:
-		if random.random()<0.05 or random.random()<0.0002 and b.on == 0:
-			b.on = 1
-			ra = math.pi/20.0+random.random()*math.pi/6.0*2.1
-			rl = random.choice([3,4,5])
-			b.v=[rl*math.cos(ra)/4,-rl*math.sin(ra)/4]
-		if b.on == 1:
-			b.simpFly()
+		b.x -=2*SPEED
+		if b.health > 0:
+			if ((abs(30 - b.x) < 320 and random.random()<0.005) or random.random()<0.0002) and b.on == 0:
+				b.on = 1
+				ra = math.pi/20.0+random.random()*math.pi/6.0*2.1
+				rl = random.choice([3,4,5])
+				b.v=[rl*math.cos(ra),-rl*math.sin(ra)]
+			if b.on == 1:
+				b.simpFly()
 
-			if abs(320 - b.x) > 160:
-				b.v[1] = min((b.v[1]+0.05) /4,0.1)
-			if b.y >= 2:
-				b.on = 0
+				if abs(30 - b.x) > 160:
+					b.v[1] = min(b.v[1]+0.05,0.4)
+				if b.y >= 2:
+					b.on = 0
 
+			else:
+				b.rest()
+				if 0 < b.x < width/2:
+					b.yo=onlandY(b.x)-3
+
+			if b.x<0 or b.x>width or b.yo<0:
+				birds.remove(b)
 		else:
-			b.rest()
-			if 0 < b.x < width/2:
-				b.yo=height-3-onlandY(b.x)
-
-		if b.x<0 or b.x>width or b.yo<0:
-			birds.remove(b)
+			b.fall()
 
 def makeDeers(n):
 	global deers
